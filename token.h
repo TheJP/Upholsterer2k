@@ -21,7 +21,7 @@ typedef enum {
 
 typedef struct {
     TokenType type;
-    StringView string_view;    
+    StringView string_view;
     size_t row, column;
 } Token;
 
