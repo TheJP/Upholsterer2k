@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include "lexer.h"
 #include "string_view.h"
 
 StringView read_whole_file(FILE* const file) {
@@ -47,9 +48,14 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Usage: %s [SOURCEFILE]\n", argv[0]);
         return EXIT_FAILURE;
     }
-    printf("length is %zu\n", source.length);
-    fwrite(source.data, sizeof(char), source.length, stdout);
-    printf("\n");
+
+    TokenVector tokens = tokenize(source);
+
+    for (size_t i = 0; i < tokens.size; ++i) {
+        printf("%s\n", token_type_to_string(tokens.data[i].type));
+    }
+
+    token_vector_free(&tokens);
     free(source.data);
     return EXIT_SUCCESS;
 }

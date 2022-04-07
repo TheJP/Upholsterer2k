@@ -24,6 +24,10 @@ add_executable (
     "token.c"
     "token.h"
     "types.h"
+    "token_vector.h"
+    "token_vector.c"
+    "lexer.h"
+    "lexer.c"
 )
 
 # set binary filenames
