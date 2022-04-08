@@ -1,6 +1,7 @@
 #include "token.h"
 #include "string_view_utils.h"
 #include <assert.h>
+#include <stdbool.h>
 
 char const* token_type_to_string(TokenType token_type) {
     switch (token_type) {
@@ -8,7 +9,8 @@ char const* token_type_to_string(TokenType token_type) {
         TOKEN_TYPE_LIST
         #undef X
         default:
-            return "unknown token type";
+            assert(false && "unreachable");
+            break;
     }
 }
 
