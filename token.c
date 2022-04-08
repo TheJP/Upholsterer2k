@@ -2,22 +2,11 @@
 #include "string_view_utils.h"
 #include <assert.h>
 
-#define TOKEN_TYPE_CASE(type) case type : return #type
-
 char const* token_type_to_string(TokenType token_type) {
     switch (token_type) {
-        TOKEN_TYPE_CASE(TOKEN_TYPE_ASTERISK);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_COLON);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_IDENTIFIER);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_STRING_LITERAL);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_WORD_LITERAL);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_LEFT_BRACKET);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_RIGHT_BRACKET);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_DOT);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_REGISTER);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_COMMA);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_NEWLINE);
-        TOKEN_TYPE_CASE(TOKEN_TYPE_EOF);
+        #define X(type) case type : return #type ;
+        TOKEN_TYPE_LIST
+        #undef X
         default:
             return "unknown token type";
     }
