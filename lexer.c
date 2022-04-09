@@ -1,11 +1,48 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdbool.h>
 #include "lexer.h"
+
+typedef enum {
+    DECIMAL,
+    HEXADECIMAL,
+    BINARY,
+    UNKNOWN,
+} WordLiteralType;
 
 static void error(char* message, size_t line, size_t column) {
     fprintf(stderr, "Error at line %zu:%zu: %s\n", line, column, message);
     exit(EXIT_FAILURE); // no memory cleanup? ¯\_(ツ)_/¯
+}
+
+static size_t minimum_required_length(WordLiteralType type) {
+    switch (type) {
+        case DECIMAL:
+            return 1;
+        case HEXADECIMAL:
+        case BINARY:
+            return 3;
+        default:
+            return 0;
+    }
+}
+
+static bool is_valid_digit(char const c, WordLiteralType base) {    
+    switch (base) {
+        case DECIMAL:
+            return isdigit(c);
+        case HEXADECIMAL:
+            return isxdigit(c);
+        case BINARY:
+            return c == '0' || c == '1';
+        case UNKNOWN:
+            return false;
+        default:
+            assert(false && "invalid base");
+            return false;
+    }
 }
 
 TokenVector tokenize(StringView source) {
@@ -121,13 +158,63 @@ TokenVector tokenize(StringView source) {
                 break;
             default:
                 if (isdigit(*current)) { // word literal
-                    
+                    if (current + 1 == end) { // reached EOF
+                        token_vector_push(&tokens, (Token){
+                            .type = TOKEN_TYPE_WORD_LITERAL,
+                            .string_view = {
+                                .data = current,
+                                .length = 1,
+                            },
+                            .column = column,
+                            .line = line,
+                        });                        
+                    } else {
+                        char* const literal_start = current;
+                        ++current;
+                        ++column;
+                        WordLiteralType word_literal_type;
+                        switch (*current) {
+                            case 'x':
+                                ++current;
+                                ++column;
+                                word_literal_type = HEXADECIMAL;
+                                break;
+                            case 'b':
+                                ++current;
+                                ++column;
+                                word_literal_type = BINARY;
+                                break;
+                            default:
+                                word_literal_type = isdigit(*current) ? DECIMAL : UNKNOWN;
+                                break;
+                        }
+                        while (current != end && is_valid_digit(*current, word_literal_type)) {
+                            ++current;
+                            ++column;
+                        }
+                        size_t const literal_length = (size_t)(current - literal_start);
+                        if (literal_length < minimum_required_length(word_literal_type)) {
+                            error("end of word literal unexpected", line, column);
+                        }
+                        token_vector_push(&tokens, (Token){
+                            .type = TOKEN_TYPE_WORD_LITERAL,
+                            .string_view = {
+                                .data = literal_start,
+                                .length = literal_length,
+                            },
+                            .column = column,
+                            .line = line,
+                        });
+                        --current;
+                        --column;
+                    }
                 } else { // identifier
 
                 }
                 break;
         }
         ++current;
+        ++column;
     }
     token_vector_push(&tokens, (Token){
         .type = TOKEN_TYPE_EOF,

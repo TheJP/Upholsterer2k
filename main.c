@@ -52,7 +52,11 @@ int main(int argc, char** argv) {
     TokenVector tokens = tokenize(source);
 
     for (size_t i = 0; i < tokens.size; ++i) {
-        printf("%s\n", token_type_to_string(tokens.data[i].type));
+        printf("%s", token_type_to_string(tokens.data[i].type));
+        if (tokens.data[i].type == TOKEN_TYPE_WORD_LITERAL) {
+            printf(" (%.*s)", (int)tokens.data[i].string_view.length, tokens.data[i].string_view.data);
+        }
+        printf("\n");
     }
 
     token_vector_free(&tokens);
