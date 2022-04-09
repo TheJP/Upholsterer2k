@@ -37,5 +37,5 @@ set_target_properties( ${TARGET_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${TARGET_NA
 set_target_properties( ${TARGET_NAME} PROPERTIES OUTPUT_NAME_MINSIZEREL ${TARGET_NAME}-minsizerel )
 
 # set warning levels
-target_compile_options(${TARGET_NAME} PUBLIC -Wall -Wextra -Wconversion -pedantic -fsanitize=address,undefined)
+target_compile_options(${TARGET_NAME} PUBLIC -Wall -Wextra -Wconversion -Wswitch -Wimplicit-fallthrough -pedantic -fsanitize=address,undefined)
 target_link_options(${TARGET_NAME} PUBLIC -fsanitize=address,undefined)
