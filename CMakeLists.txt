@@ -30,6 +30,8 @@ add_executable (
     "lexer.h"
     "lexer.c"
     "source_file.h"
+    "error.h"
+    "error.c"
 )
 
 # set binary filenames

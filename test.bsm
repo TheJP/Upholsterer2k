@@ -9,7 +9,7 @@ main:
    copy 42, R0 // copy 42 into register 0
    copy R0, R15 // copy the value of register 0 into register 15
    copy R15, *0x00AB0000 // copy the value of register 15 into memory at location 0x00AB0000
-   copy *0x00AB0000, €R16 // copy the value at memory location 0x00AB0000 into register 16
+   copy *0x00AB0000, R16 // copy the value at memory location 0x00AB0000 into register 16
 
    copy 0xAB0004, R20 // copy the value 0xAB0004 into register 20
    copy R0, *R20 // copy the value of register 0 into memory at the location stored in register 20
