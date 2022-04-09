@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "string_view.h"
 #include "source_file.h"
+#include "opcodes.h"
 
 StringView read_whole_file(FILE* const file) {
     size_t capacity = 0;
@@ -73,5 +74,11 @@ int main(int argc, char** argv) {
 
     token_vector_free(&tokens);
     free(source.data);
+
+    OpcodeList opcodes = opcode_specifications();
+    for (size_t i = 0; i < opcodes.num_specifications; ++i) {
+        printf("%s (0x%04lX)\n", opcodes.specifications[i].name, opcodes.specifications[i].opcode);
+    }
+    free(opcodes.specifications);
     return EXIT_SUCCESS;
 }

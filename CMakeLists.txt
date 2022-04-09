@@ -34,6 +34,8 @@ add_executable (
     "error.c"
     "opcode_specification.h"
     "opcode_specification.c"
+    "opcodes.h"
+    "opcodes.c"
 )
 
 # set binary filenames

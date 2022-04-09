@@ -5,9 +5,10 @@
 #include <stdint.h>
 
 typedef enum {
-    Immediate,
-    Register,
-    Pointer,
+    ARGUMENT_TYPE_NONE,
+    ARGUMENT_TYPE_IMMEDIATE,
+    ARGUMENT_TYPE_REGISTER,
+    ARGUMENT_TYPE_POINTER,
     // TODO: Difference?
 } ArgumentType;
 
