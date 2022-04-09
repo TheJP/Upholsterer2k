@@ -1,5 +1,7 @@
 // this is a comment
 
+jump main
+
 error_string:
     .string "Some error\n- or let's call it \"happy little accident\" -\noccured"
 one_big_number:

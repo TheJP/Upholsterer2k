@@ -32,6 +32,8 @@ add_executable (
     "source_file.h"
     "error.h"
     "error.c"
+    "opcode_specification.h"
+    "opcode_specification.c"
 )
 
 # set binary filenames
