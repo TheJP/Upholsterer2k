@@ -7,4 +7,5 @@ typedef struct {
     size_t length;
 } StringView;
 
-StringView string_view_from_pointers(char* const start_inclusive, char* const end_exclusive);
+StringView string_view_from_pointers(char* start_inclusive, char* end_exclusive);
+StringView string_view_from_string(char* string);

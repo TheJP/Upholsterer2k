@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include "string_view.h"
 
 StringView string_view_from_pointers(char* const start_inclusive, char* const end_exclusive) {
@@ -8,5 +9,12 @@ StringView string_view_from_pointers(char* const start_inclusive, char* const en
     return (StringView){
         .data = start_inclusive,
         .length = (size_t)(end_exclusive - start_inclusive),
+    };
+}
+
+StringView string_view_from_string(char* const string) {
+    return (StringView){
+        .data = string,
+        .length = strlen(string),
     };
 }

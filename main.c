@@ -4,6 +4,7 @@
 #include <string.h>
 #include "lexer.h"
 #include "string_view.h"
+#include "source_file.h"
 
 StringView read_whole_file(FILE* const file) {
     size_t capacity = 0;
@@ -48,8 +49,12 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Usage: %s [SOURCEFILE]\n", argv[0]);
         return EXIT_FAILURE;
     }
+    SourceFile source_file = {
+        .filename = string_view_from_string(argc == 1 ? "<stdin>" : argv[1]),
+        .source = source,
+    };
 
-    TokenVector tokens = tokenize(source);
+    TokenVector tokens = tokenize(source_file);
 
     for (size_t i = 0; i < tokens.size; ++i) {
         printf("%s", token_type_to_string(tokens.data[i].type));

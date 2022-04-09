@@ -29,6 +29,7 @@ add_executable (
     "token_vector.c"
     "lexer.h"
     "lexer.c"
+    "source_file.h"
 )
 
 # set binary filenames

@@ -12,8 +12,40 @@ typedef enum {
     UNKNOWN,
 } WordLiteralType;
 
-static void error(char* message, size_t line, size_t column) {
-    fprintf(stderr, "Error at line %zu:%zu: %s\n", line, column, message);
+static void error(
+    SourceFile const source_file,
+    char const * const message,
+    size_t const line,
+    size_t const column,
+    size_t squiggly_length
+) {
+    assert(squiggly_length >= 1);
+    fprintf(
+        stderr, "%.*s:%zu:%zu: %s\n",
+        (int)source_file.filename.length,
+        source_file.filename.data,
+        line, column, message
+    );
+    size_t line_start = 0;
+    size_t current_line = 1;
+    while (current_line < line) {
+        assert(line_start < source_file.source.length);
+        if (source_file.source.data[line_start] == '\n') {
+            ++current_line;
+        }
+        ++line_start;
+    }
+    size_t line_end = line_start;
+    while (line_end < source_file.source.length && source_file.source.data[line_end] != '\n') {
+        ++line_end;
+    }
+    size_t const line_length = line_end - line_start;
+    fprintf(stderr, "%.*s\n", (int)line_length, &source_file.source.data[line_start]);
+    fprintf(stderr, "%*c", (int)column, '^');
+    for (size_t i = 1; i < squiggly_length; ++i) {
+        fputc('~', stderr);
+    }
+    fputs(" error occurred here\n", stderr);
     exit(EXIT_FAILURE); // no memory cleanup? ¯\_(ツ)_/¯
 }
 
@@ -61,13 +93,13 @@ static bool is_escape_sequence_char(char const c) {
     return c == '"' || c == '\\' || c == 't' || c == 'n' || c == 'v' || c == 'f' || c == 'r';
 }
 
-TokenVector tokenize(StringView source) {
+TokenVector tokenize(SourceFile const source_file) {
     TokenVector tokens = token_vector_create();
-    if (source.length == 0) {
+    if (source_file.source.length == 0) {
         return tokens;
     }
-    char* current = source.data;
-    char* const end = source.data + source.length;
+    char* current = source_file.source.data;
+    char* const end = source_file.source.data + source_file.source.length;
     size_t line = 1;
     size_t column = 1;
     while (current != end) {
@@ -156,7 +188,7 @@ TokenVector tokenize(StringView source) {
             case '/':
                 ++current;
                 if (current == end || *current != '/') {
-                    error("'/' expected", line, column);
+                    error(source_file, "'/' expected", line, column, 1);
                 }
                 while (current != end && *current != '\n') {
                     ++current;
@@ -173,7 +205,7 @@ TokenVector tokenize(StringView source) {
                     if (*current == '\\') {
                         // escape sequence
                         if (current + 1 == end || !is_escape_sequence_char(*(current + 1))) {
-                            error("invalid escape sequence", line, column);
+                            error(source_file, "invalid escape sequence", line, column, 1);
                         }
                         ++current;
                         ++column;
@@ -182,10 +214,10 @@ TokenVector tokenize(StringView source) {
                     ++column;
                 }
                 if (!is_valid_string_literal_char(*current)) {
-                    error("character not allowed in string literal", line, column);
+                    error(source_file, "character not allowed in string literal", line, column, 1);
                 }
                 if (current == end || *current != '"') {
-                    error("unterminated string literal", line, column);
+                    error(source_file, "unterminated string literal", line, column, 1);
                 }
                 ++current;
                 ++column;
@@ -258,7 +290,7 @@ TokenVector tokenize(StringView source) {
                         }
                         size_t const literal_length = (size_t)(current - literal_start);
                         if (literal_length < minimum_required_length(word_literal_type)) {
-                            error("end of word literal unexpected", line, column);
+                            error(source_file, "end of word literal unexpected", line, column, 1);
                         }
                         token_vector_push(&tokens, (Token){
                             .type = TOKEN_TYPE_WORD_LITERAL,
@@ -290,7 +322,7 @@ TokenVector tokenize(StringView source) {
                     --current;
                     --column;
                 } else {
-                    error("unexpected input", line, column);
+                    error(source_file, "unexpected input", line, column, 1);
                 }
                 break;
         }
