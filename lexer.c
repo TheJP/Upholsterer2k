@@ -68,10 +68,9 @@ TokenVector tokenize(StringView source) {
     }
     char* current = source.data;
     char* const end = source.data + source.length;
-    size_t line = 0;
-    size_t column = 0;
+    size_t line = 1;
+    size_t column = 1;
     while (current != end) {
-        ++column;
         switch (*current) {
             case '\n':
                 if (tokens.size == 0 || tokens.data[tokens.size - 1].type != TOKEN_TYPE_NEWLINE) {
@@ -162,8 +161,8 @@ TokenVector tokenize(StringView source) {
                 while (current != end && *current != '\n') {
                     ++current;
                 }
-                column = 0;
                 ++line;
+                column = 0;
                 break;
             case '"': {
                 // string literals
