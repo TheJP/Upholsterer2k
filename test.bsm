@@ -3,7 +3,7 @@
 error_string:
     .string "Some error occured"
 one_big_number:
-    .words[1, 2, 3, 4]
+    .words[1,2,3,4]
 
 main:
    copy 42, R0 // copy 42 into register 0
