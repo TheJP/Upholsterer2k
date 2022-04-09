@@ -53,6 +53,14 @@ static bool is_valid_identifier_inner_char(char const c) {
     return is_valid_identifier_start_char(c) || isdigit(c);
 }
 
+static bool is_valid_string_literal_char(char const c) {
+    return isprint(c) && (!isspace(c) || c == ' ');
+}
+
+static bool is_escape_sequence_char(char const c) {
+    return c == '"' || c == '\\' || c == 't' || c == 'n' || c == 'v' || c == 'f' || c == 'r';
+}
+
 TokenVector tokenize(StringView source) {
     TokenVector tokens = token_vector_create();
     if (source.length == 0) {
@@ -157,9 +165,41 @@ TokenVector tokenize(StringView source) {
                 column = 0;
                 ++line;
                 break;
-            case '"':
+            case '"': {
                 // string literals
+                char* const literal_start = current;
+                ++current;
+                ++column;
+                while (current != end && *current != '"' && is_valid_string_literal_char(*current)) {
+                    if (*current == '\\') {
+                        // escape sequence
+                        if (current + 1 == end || !is_escape_sequence_char(*(current + 1))) {
+                            error("invalid escape sequence", line, column);
+                        }
+                        ++current;
+                        ++column;
+                    }
+                    ++current;
+                    ++column;
+                }
+                if (!is_valid_string_literal_char(*current)) {
+                    error("character not allowed in string literal", line, column);
+                }
+                if (current == end || *current != '"') {
+                    error("unterminated string literal", line, column);
+                }
+                ++current;
+                ++column;
+                token_vector_push(&tokens, (Token){
+                    .type = TOKEN_TYPE_STRING_LITERAL,
+                    .string_view = string_view_from_pointers(literal_start, current),
+                    .column = column,
+                    .line = line,
+                });
+                --current;
+                --column;
                 break;
+            }
             default:
                 if (isspace(*current)) {
                     // do nothing
