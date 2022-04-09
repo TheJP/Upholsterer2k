@@ -29,7 +29,7 @@ static size_t minimum_required_length(WordLiteralType type) {
     }
 }
 
-static bool is_valid_digit(char const c, WordLiteralType base) {    
+static bool is_valid_digit(char const c, WordLiteralType base) {
     switch (base) {
         case DECIMAL:
             return isdigit(c);
@@ -68,7 +68,7 @@ TokenVector tokenize(StringView source) {
                         .column = column,
                         .line = line,
                     });
-                }                
+                }
                 ++line;
                 column = 0;
                 break;
@@ -149,16 +149,31 @@ TokenVector tokenize(StringView source) {
                 column = 0;
                 ++line;
                 break;
-            case 'R':
-            case 'r':
-                // register
-                break;
             case '"':
                 // string literals
                 break;
             default:
-                if (isdigit(*current)) { // word literal
-                    if (current + 1 == end) { // reached EOF
+                if ((*current == 'r' || *current == 'R') && current + 1 != end && isdigit(*(current + 1))) {
+                    // register
+                    char* const register_start = current;
+                    ++current;
+                    ++column;
+                    while (current != end && isdigit(*current)) {
+                        ++current;
+                        ++column;
+                    }
+                    token_vector_push(&tokens, (Token){
+                        .type = TOKEN_TYPE_REGISTER,
+                        .string_view = string_view_from_pointers(register_start, current),
+                        .line = line,
+                        .column = column,
+                    });
+                    --current;
+                    --column;
+                } else if (isdigit(*current)) {
+                    // word literal
+                    if (current + 1 == end) {
+                        // reached EOF
                         token_vector_push(&tokens, (Token){
                             .type = TOKEN_TYPE_WORD_LITERAL,
                             .string_view = {
@@ -167,7 +182,7 @@ TokenVector tokenize(StringView source) {
                             },
                             .column = column,
                             .line = line,
-                        });                        
+                        });
                     } else {
                         char* const literal_start = current;
                         ++current;

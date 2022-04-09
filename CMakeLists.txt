@@ -21,6 +21,7 @@ add_executable (
     "string_view_utils.c"
     "string_view_utils.h"
     "string_view.h"
+    "string_view.c"
     "token.c"
     "token.h"
     "types.h"

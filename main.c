@@ -53,8 +53,11 @@ int main(int argc, char** argv) {
 
     for (size_t i = 0; i < tokens.size; ++i) {
         printf("%s", token_type_to_string(tokens.data[i].type));
-        if (tokens.data[i].type == TOKEN_TYPE_WORD_LITERAL) {
-            printf(" (%.*s)", (int)tokens.data[i].string_view.length, tokens.data[i].string_view.data);
+        switch (tokens.data[i].type) {
+            case TOKEN_TYPE_WORD_LITERAL:
+            case TOKEN_TYPE_REGISTER:
+                printf(" (%.*s)", (int)tokens.data[i].string_view.length, tokens.data[i].string_view.data);
+                break;
         }
         printf("\n");
     }
