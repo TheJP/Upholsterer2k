@@ -45,6 +45,14 @@ static bool is_valid_digit(char const c, WordLiteralType base) {
     }
 }
 
+static bool is_valid_identifier_start_char(char const c) {
+    return isalpha(c) || c == '_' || c == '$';
+}
+
+static bool is_valid_identifier_inner_char(char const c) {
+    return is_valid_identifier_start_char(c) || isdigit(c);
+}
+
 TokenVector tokenize(StringView source) {
     TokenVector tokens = token_vector_create();
     if (source.length == 0) {
@@ -153,7 +161,9 @@ TokenVector tokenize(StringView source) {
                 // string literals
                 break;
             default:
-                if ((*current == 'r' || *current == 'R') && current + 1 != end && isdigit(*(current + 1))) {
+                if (isspace(*current)) {
+                    // do nothing
+                } else if ((*current == 'r' || *current == 'R') && current + 1 != end && isdigit(*(current + 1))) {
                     // register
                     char* const register_start = current;
                     ++current;
@@ -223,8 +233,25 @@ TokenVector tokenize(StringView source) {
                         --current;
                         --column;
                     }
-                } else { // identifier
-
+                } else if (is_valid_identifier_start_char(*current)) {
+                    // identifier
+                    char* const identifier_start = current;
+                    ++current;
+                    ++column;
+                    while (current != end && is_valid_identifier_inner_char(*current)) {
+                        ++current;
+                        ++column;
+                    }
+                    token_vector_push(&tokens, (Token){
+                        .type = TOKEN_TYPE_IDENTIFIER,
+                        .string_view = string_view_from_pointers(identifier_start, current),
+                        .line = line,
+                        .column = column,
+                    });
+                    --current;
+                    --column;
+                } else {
+                    error("unexpected input", line, column);
                 }
                 break;
         }

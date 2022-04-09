@@ -56,7 +56,10 @@ int main(int argc, char** argv) {
         switch (tokens.data[i].type) {
             case TOKEN_TYPE_WORD_LITERAL:
             case TOKEN_TYPE_REGISTER:
+            case TOKEN_TYPE_IDENTIFIER:
                 printf(" (%.*s)", (int)tokens.data[i].string_view.length, tokens.data[i].string_view.data);
+                break;
+            default:
                 break;
         }
         printf("\n");
