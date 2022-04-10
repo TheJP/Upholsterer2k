@@ -9,7 +9,7 @@ CREATE_VECTOR_DEFINITION(ByteVector, uint8_t, byte_vector)
 
 typedef struct {
     ArgumentType type;
-    Token* first_token;
+    Token const* first_token;
 } Argument;
 
 typedef struct {
@@ -20,8 +20,8 @@ typedef struct {
 CREATE_VECTOR_DECLARATION(LabelVector, Label, label_vector)
 CREATE_VECTOR_DEFINITION(LabelVector, Label, label_vector)
 
-CREATE_VECTOR_DECLARATION(ArgumentVector, Argument, argument_vector);
-CREATE_VECTOR_DEFINITION(ArgumentVector, Argument, argument_vector);
+CREATE_VECTOR_DECLARATION(ArgumentVector, Argument, argument_vector)
+CREATE_VECTOR_DEFINITION(ArgumentVector, Argument, argument_vector)
 
 typedef struct {
     TokenVector tokens;
@@ -166,7 +166,7 @@ bool do_argument_lists_match(
     return true;
 }
 
-OpcodeSpecification* find_opcode(Token const * const mnemonic, ArgumentVector const arguments) {
+OpcodeSpecification const* find_opcode(Token const * const mnemonic, ArgumentVector const arguments) {
     for (size_t i = 0; i < state.opcodes.num_specifications; ++i) {
         OpcodeSpecification const * const opcode = &state.opcodes.specifications[i];
         if (
@@ -189,14 +189,14 @@ OpcodeSpecification* find_opcode(Token const * const mnemonic, ArgumentVector co
 void emit_instruction(Token const * const mnemonic, ArgumentVector const arguments) {
     printf(
         "should emit instruction for mnemonic %.*s with %zu arguments.\n",
-        mnemonic->string_view.length,
+        (int)mnemonic->string_view.length,
         mnemonic->string_view.data,
         arguments.size
     );
     for (size_t i = 0; i < arguments.size; ++i) {
         printf(
             "\t%.*s\n",
-            arguments.data[i].first_token->string_view.length,
+            (int)arguments.data[i].first_token->string_view.length,
             arguments.data[i].first_token->string_view.data
         );
     }
@@ -206,10 +206,105 @@ void emit_instruction(Token const * const mnemonic, ArgumentVector const argumen
     } else {
         printf(
             "\tfound matching opcode: %.*s (0x%#.04x)\n",
-            opcode->name.length,
+            (int)opcode->name.length,
             opcode->name.data,
             opcode->opcode
         );
+    }
+}
+
+void parse_label() {
+    if (!register_label(identifier_from_token(current()))) {
+        error_on_current_token("label redefinition");
+    }
+    next(); // consume colon following label name
+}
+
+void parse_instruction() {
+    Token const * const mnemonic = current();
+    Token const* current_argument_start = NULL;
+    ArgumentVector arguments = argument_vector_create();
+    bool valid_argument_start_position = true;
+    next();
+    while (true) {
+        if (current()->type == TOKEN_TYPE_COMMA) {
+            if (valid_argument_start_position) {
+                error_on_current_token("unexpected comma");
+            } else {
+                next();
+                valid_argument_start_position = true;
+            }
+        }
+        if (current()->type == TOKEN_TYPE_ASTERISK) {
+            // pointer or address
+            current_argument_start = current();
+        } else if (current()->type == TOKEN_TYPE_EOF || current()->type == TOKEN_TYPE_NEWLINE) {
+            if (current_argument_start != NULL) {
+                error_on_current_token("register or address expected");
+            }
+            break;
+        } else {
+            if (current_argument_start == NULL) {
+                // no pointer and no address
+                switch (current()->type) {
+                    case TOKEN_TYPE_WORD_LITERAL:
+                        argument_vector_push(&arguments, (Argument){
+                            .type = ARGUMENT_TYPE_IMMEDIATE,
+                            .first_token = current(),
+                        });
+                        valid_argument_start_position = false;
+                        break;
+                    case TOKEN_TYPE_REGISTER:
+                        argument_vector_push(&arguments, (Argument){
+                            .type = ARGUMENT_TYPE_REGISTER,
+                            .first_token = current(),
+                        });
+                        valid_argument_start_position = false;
+                        break;
+                    case TOKEN_TYPE_IDENTIFIER:
+                        argument_vector_push(&arguments, (Argument){
+                            .type = ARGUMENT_TYPE_LABEL,
+                            .first_token = current(),
+                        });
+                        valid_argument_start_position = false;
+                        break;
+                    default:
+                        error_on_current_token("invalid argument");
+                }
+            } else {
+                // second token of pointer or address
+                switch (current()->type) {
+                    case TOKEN_TYPE_WORD_LITERAL:
+                        argument_vector_push(&arguments, (Argument){
+                            .type = ARGUMENT_TYPE_ADDRESS,
+                            .first_token = current_argument_start,
+                        });
+                        valid_argument_start_position = false;
+                        break;
+                    case TOKEN_TYPE_REGISTER:
+                        argument_vector_push(&arguments, (Argument){
+                            .type = ARGUMENT_TYPE_POINTER,
+                            .first_token = current_argument_start,
+                        });
+                        valid_argument_start_position = false;
+                        break;
+                    default:
+                        error_on_current_token("invalid argument");
+                }
+                current_argument_start = NULL;
+            }
+        }
+        next();
+    }
+    emit_instruction(mnemonic, arguments);
+    argument_vector_free(&arguments);
+}
+
+void parse_identifier() {
+    if (peek()->type == TOKEN_TYPE_COLON) {
+        parse_label();
+    } else {
+        parse_instruction();
     }
 }
 
@@ -223,91 +318,12 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
     while (current()->type != TOKEN_TYPE_EOF) {
         switch (current()->type) {
             case TOKEN_TYPE_IDENTIFIER:
-                if (peek()->type == TOKEN_TYPE_COLON) {
-                    // label
-                    if (!register_label(identifier_from_token(current()))) {
-                        error_on_current_token("label redefinition");
-                    }
-                } else {
-                    // instruction
-                    Token const * const mnemonic = current();
-                    Token const* current_argument_start = NULL;
-                    ArgumentVector arguments = argument_vector_create();
-                    bool valid_argument_start_position = true;
-                    next();
-                    while (true) {
-                        if (current()->type == TOKEN_TYPE_COMMA) {
-                            if (valid_argument_start_position) {
-                                error_on_current_token("unexpected comma");
-                            } else {
-                                next();
-                                valid_argument_start_position = true;
-                            }
-                        }
-                        if (current()->type == TOKEN_TYPE_ASTERISK) {
-                            // pointer or address
-                            current_argument_start = current();
-                        } else if (current()->type == TOKEN_TYPE_EOF || current()->type == TOKEN_TYPE_NEWLINE) {
-                            if (current_argument_start != NULL) {
-                                error_on_current_token("register of address expected");
-                            }
-                            break;
-                        } else {
-                            if (current_argument_start == NULL) {
-                                // no pointer and no address
-                                switch (current()->type) {
-                                    case TOKEN_TYPE_WORD_LITERAL:
-                                        argument_vector_push(&arguments, (Argument){
-                                            .type = ARGUMENT_TYPE_IMMEDIATE,
-                                            .first_token = current(),
-                                        });
-                                        valid_argument_start_position = false;
-                                        break;
-                                    case TOKEN_TYPE_REGISTER:
-                                        argument_vector_push(&arguments, (Argument){
-                                            .type = ARGUMENT_TYPE_REGISTER,
-                                            .first_token = current(),
-                                        });
-                                        valid_argument_start_position = false;
-                                        break;
-                                    case TOKEN_TYPE_IDENTIFIER:
-                                        argument_vector_push(&arguments, (Argument){
-                                            .type = ARGUMENT_TYPE_LABEL,
-                                            .first_token = current(),
-                                        });
-                                        valid_argument_start_position = false;
-                                        break;
-                                    default:
-                                        error_on_current_token("invalid argument");
-                                }
-                            } else {
-                                // second token of pointer or address
-                                switch (current()->type) {
-                                    case TOKEN_TYPE_WORD_LITERAL:
-                                        argument_vector_push(&arguments, (Argument){
-                                            .type = ARGUMENT_TYPE_ADDRESS,
-                                            .first_token = current_argument_start,
-                                        });
-                                        valid_argument_start_position = false;
-                                        break;
-                                    case TOKEN_TYPE_REGISTER:
-                                        argument_vector_push(&arguments, (Argument){
-                                            .type = ARGUMENT_TYPE_POINTER,
-                                            .first_token = current_argument_start,
-                                        });
-                                        valid_argument_start_position = false;
-                                        break;
-                                    default:
-                                        error_on_current_token("invalid argument");
-                                }
-                                current_argument_start = NULL;
-                            }
-                        }
-                        next();
-                    }
-                    emit_instruction(mnemonic, arguments);
-                    argument_vector_free(&arguments);
-                }
+                parse_identifier();
+                break;
+            case TOKEN_TYPE_NEWLINE:
+                break;
+            default:
+                error_on_current_token("unexpected token");
                 break;
         }
         next();
