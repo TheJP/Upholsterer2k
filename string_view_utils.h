@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include "types.h"
 #include "string_view.h"
 
@@ -9,5 +10,5 @@ typedef enum {
     BASE_BINARY = 2,
 } Base;
 
-Word parse_word(StringView string_view);
-Word parse_word_with_base(StringView const string_view, Base const base);
+void parse_word(StringView string_view, bool* out_success, Word* out_result);
+void parse_word_with_base(StringView const string_view, Base const base, bool* out_success, Word* out_result);

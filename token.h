@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include "string_view.h"
 #include "types.h"
 
@@ -34,5 +35,5 @@ typedef struct {
 
 StringView identifier_from_token(Token const* token);
 StringView string_literal_from_token(Token const* token);
-Word word_from_token(Token const* token);
-Register register_from_token(Token const* token);
+void word_from_token(Token const* token, bool* out_success, Word* out_result);
+void register_from_token(Token const * token, bool* out_success, Register* out_register);

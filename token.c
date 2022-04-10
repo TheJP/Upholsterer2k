@@ -1,7 +1,7 @@
 #include "token.h"
 #include "string_view_utils.h"
 #include <assert.h>
-#include <stdbool.h>
+#include <ctype.h>
 
 char const* token_type_to_string(TokenType token_type) {
     switch (token_type) {
@@ -29,12 +29,30 @@ StringView string_literal_from_token(Token const * const token) {
     };
 }
 
-Word word_from_token(Token const * const token) {
+void word_from_token(Token const * const token, bool* const out_success, Word* const out_result) {
     assert(token->type == TOKEN_TYPE_WORD_LITERAL);
-    return parse_word(token->string_view);
+    parse_word(token->string_view, out_success, out_result);
 }
 
-Register register_from_token(Token const * const token) {
+void register_from_token(Token const * const token, bool* const out_success, Register* const out_register) {
     assert(token->type == TOKEN_TYPE_REGISTER);
-    // TODO
+    if (token->string_view.length > 4) {
+        *out_success = false;
+        return;
+    }
+    int result = 0;
+    int base = 1;
+    for (size_t i = token->string_view.length - 1; i > 0; --i) {
+        assert(isdigit(token->string_view.data[i]));
+        int const digit = (token->string_view.data[i] - '0');
+        result += digit * base;
+        base *= 10;
+    }
+    assert(result >= 0);
+    if (result > 255) {
+        *out_success = false;
+        return;
+    }
+    *out_register = (Register)result;
+    *out_success = true;
 }
