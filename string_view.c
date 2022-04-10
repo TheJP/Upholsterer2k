@@ -18,3 +18,17 @@ StringView string_view_from_string(char* const string) {
         .length = strlen(string),
     };
 }
+
+int string_view_compare(StringView const lhs, StringView const rhs) {
+    size_t const min_length = lhs.length < rhs.length ? lhs.length : rhs.length;
+    int const comparison_result = strncmp(lhs.data, rhs.data, min_length);
+    if (comparison_result != 0) {
+        return comparison_result;
+    }
+    if (lhs.length > rhs.length) {
+        return 1;
+    } else if (lhs.length < rhs.length) {
+        return -1;
+    }
+    return 0;
+}

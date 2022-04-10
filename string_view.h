@@ -9,3 +9,4 @@ typedef struct {
 
 StringView string_view_from_pointers(char* start_inclusive, char* end_exclusive);
 StringView string_view_from_string(char* string);
+int string_view_compare(StringView lhs, StringView rhs);
