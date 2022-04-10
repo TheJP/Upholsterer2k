@@ -117,14 +117,18 @@ bool register_label(StringView label_name) {
     return true;
 }
 
-void error_on_current_token(char const * const message) {
+void error_on_token(char const * const message, Token const * const token) {
     error(
         state.source_file,
         message,
-        current()->line,
-        current()->column,
-        current()->string_view.length
+        token->line,
+        token->column,
+        token->string_view.length
     );
+}
+
+void error_on_current_token(char const * const message) {
+    error_on_token(message, current());
 }
 
 void init_state(SourceFile const source_file, TokenVector const tokens, OpcodeList const opcodes) {
@@ -198,7 +202,7 @@ void emit_instruction(Token const * const mnemonic, ArgumentVector const argumen
     }
     OpcodeSpecification const * const opcode = find_opcode(mnemonic, arguments);
     if (opcode == NULL) {
-        printf("\t<no opcode found>\n");
+        error_on_token("unknown instruction or invalid arguments", mnemonic);
     } else {
         printf(
             "\tfound matching opcode: %.*s (0x%#.04x)\n",
