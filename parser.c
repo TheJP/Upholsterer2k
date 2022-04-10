@@ -301,6 +301,7 @@ void parse_instruction() {
 }
 
 void parse_identifier() {
+    assert(current()->type == TOKEN_TYPE_IDENTIFIER);
     if (peek()->type == TOKEN_TYPE_COLON) {
         parse_label();
     } else {
