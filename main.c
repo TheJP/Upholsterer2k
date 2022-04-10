@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
 #include "lexer.h"
 #include "string_view.h"
 #include "source_file.h"
@@ -78,6 +79,7 @@ int main(int argc, char** argv) {
     OpcodeList opcodes = opcode_specifications();
     for (size_t i = 0; i < opcodes.num_specifications; ++i) {
         OpcodeSpecification const * const specification = &opcodes.specifications[i];
+        assert(specification->mnemonic.length > 0 && "unknown opcode");
         printf(
             "%.*s (0x%04lX) -> %.*s\n",
             (int)specification->name.length,
