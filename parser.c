@@ -205,7 +205,7 @@ void emit_instruction(Token const * const mnemonic, ArgumentVector const argumen
         error_on_token("unknown instruction or invalid arguments", mnemonic);
     } else {
         printf(
-            "\tfound matching opcode: %.*s (0x%#.04x)\n",
+            "\tfound matching opcode: %.*s (%#.04x)\n",
             (int)opcode->name.length,
             opcode->name.data,
             opcode->opcode
