@@ -15,7 +15,7 @@ typedef enum {
     // TODO: Difference?
 } ArgumentType;
 
-typedef uint64_t Opcode;
+typedef uint16_t Opcode;
 
 typedef struct {
     StringView name; // e.g. "MoveRegisterImmediate"
