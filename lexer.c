@@ -162,6 +162,15 @@ TokenVector tokenize(SourceFile const source_file) {
                 while (current != end && *current != '\n') {
                     ++current;
                 }
+                if (current == end) {
+                    error(
+                        source_file,
+                        "comments must end with newline",
+                        line,
+                        (size_t)(current - current_line_start + 1),
+                        1
+                    );
+                }
                 ++line;
                 current_line_start = current + 1;
                 break;
