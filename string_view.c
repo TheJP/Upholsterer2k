@@ -33,3 +33,30 @@ int string_view_compare(StringView const lhs, StringView const rhs) {
     }
     return 0;
 }
+
+int case_insensitive_strncmp(char const * const lhs, char const * const rhs, size_t const n) {
+    for (size_t i = 0; i < n; ++i) {
+        char const left = toupper(lhs[i]);
+        char const right = toupper(rhs[i]);
+        int const comparison_result = strncmp(&left, &right, 1);
+        if (comparison_result != 0) {
+            return comparison_result;
+        }
+    }
+    return 0;
+}
+
+int string_view_compare_case_insensitive(StringView const lhs, StringView const rhs) {
+    size_t const min_length = lhs.length < rhs.length ? lhs.length : rhs.length;
+    int const comparison_result = case_insensitive_strncmp(lhs.data, rhs.data, min_length);
+    if (comparison_result != 0) {
+        return comparison_result;
+    }
+    if (lhs.length > rhs.length) {
+        return 1;
+    }
+    if (lhs.length < rhs.length) {
+        return -1;
+    }
+    return 0;
+}
