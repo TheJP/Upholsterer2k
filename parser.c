@@ -135,6 +135,30 @@ ByteVector cleanup_state() {
     return state.machine_code;
 }
 
+bool do_argument_types_match(
+    Token const * const mnemonic,
+    size_t const num_arguments,
+    OpcodeSpecification const * const opcode
+) {
+
+}
+
+OpcodeSpecification* find_opcode(Token const * const mnemonic, size_t const num_arguments) {
+    for (size_t i = 0; i < state.opcodes.num_specifications; ++i) {
+        OpcodeSpecification const * const opcode = &state.opcodes.specifications[i];
+        if (
+            opcode->argument_count == num_arguments
+            && string_view_compare(mnemonic->string_view, opcode->mnemonic)
+        ) {
+
+        }
+    }
+}
+
+void emit_instruction(Token const * const mnemonic, size_t const num_arguments) {
+
+}
+
 ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeList const opcodes) {
     assert(tokens.size > 0);
     assert(tokens.data[tokens.size - 1].type == TOKEN_TYPE_EOF);
@@ -152,7 +176,13 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
                     }
                 } else {
                     // instruction
-
+                    Token const * const mnemonic = current();
+                    next();
+                    while (current()->type != TOKEN_TYPE_EOF && current()->type != TOKEN_TYPE_NEWLINE) {
+                        next();
+                    }
+                    size_t const num_arguments = current() - mnemonic - 1;
+                    emit_instruction(mnemonic, num_arguments);
                 }
                 break;
         }

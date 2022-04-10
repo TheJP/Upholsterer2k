@@ -8,6 +8,7 @@
 typedef enum {
     ARGUMENT_TYPE_NONE,
     ARGUMENT_TYPE_IMMEDIATE,
+    ARGUMENT_TYPE_ADDRESS,
     ARGUMENT_TYPE_REGISTER,
     ARGUMENT_TYPE_POINTER,
     // TODO: Difference?
@@ -87,6 +88,6 @@ typedef struct {
     X(PollCycleCountHighLow, POLL_CYCLES) \
 \
     X(DumpRegisters, DUMP_REGISTERS) \
-    X(DumpMemory, DUMP_MEMORY)
+    X(DumpMemory, DUMP_REGISTERS)
 
 StringView opcode_to_mnemonic(StringView opcode);

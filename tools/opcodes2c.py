@@ -1,6 +1,15 @@
 import sys
 import json
 
+def argument_as_c_enum(argument):
+    if "Register" in argument:
+        return "ARGUMENT_TYPE_REGISTER"
+    argument_mappings = {
+        "Immediate": "ARGUMENT_TYPE_IMMEDIATE",
+        "Address": "ARGUMENT_TYPE_ADDRESS",
+    }
+    return argument_mappings[argument]
+
 def main():
     if len(sys.argv) != 3:
         sys.stderr.write(f"Usage: {sys.argv[0]} <input file> <output file>\n")
@@ -24,17 +33,13 @@ OpcodeList opcode_specifications() {\n""")
                     out_file.write(f"    size_t const num_opcodes = {num_opcodes};\n")
                     out_file.write("    OpcodeSpecification* specifications = malloc(num_opcodes * sizeof(*specifications));\n")
                     for i, opcode in enumerate(data["opcodes"]):
-                        argument_count = len(data["opcodes"][opcode]["registers"])
-                        if data["opcodes"][opcode]["opcode_type"] != None:
-                            argument_count += 1
+                        argument_count = len(data["opcodes"][opcode]["arguments"])
                         out_file.write(f"    specifications[{i}] = (OpcodeSpecification){{\n")
                         out_file.write(f"        .name = string_view_from_string(\"{opcode}\"),\n")
                         out_file.write(f"        .mnemonic = opcode_to_mnemonic(string_view_from_string(\"{opcode}\")),\n")
                         out_file.write(f"        .argument_count = {argument_count},\n")
                         out_file.write(f"        .required_arguments = {{ ")
-                        arguments = list(map(lambda register : "ARGUMENT_TYPE_POINTER" if register[1] == "pointer" else "ARGUMENT_TYPE_REGISTER", data["opcodes"][opcode]["registers"]))
-                        if data["opcodes"][opcode]["opcode_type"] != None:
-                            arguments.append("ARGUMENT_TYPE_IMMEDIATE")
+                        arguments = list(map(lambda argument : argument_as_c_enum(argument), data["opcodes"][opcode]["arguments"]))
                         out_file.write("ARGUMENT_TYPE_NONE" if len(arguments) == 0 else ', '.join(arguments))
                         out_file.write(f" }},\n")
                         opcode = data["opcodes"][opcode]["opcode"]
