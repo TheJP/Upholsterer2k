@@ -3,7 +3,7 @@ import json
 
 def argument_as_c_enum(argument):
     if "Register" in argument:
-        return "ARGUMENT_TYPE_REGISTER"
+        return "ARGUMENT_TYPE_REGISTER" if argument["Register"][1] != "pointer" else "ARGUMENT_TYPE_POINTER"
     argument_mappings = {
         "Immediate": "ARGUMENT_TYPE_IMMEDIATE",
         "Address": "ARGUMENT_TYPE_ADDRESS",

@@ -17,14 +17,14 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("JumpRegisterIfNotDivideByZero"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfNotDivideByZero")),
         .argument_count = 1,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER },
         .opcode = 0x30,
     };
     specifications[2] = (OpcodeSpecification){
         .name = string_view_from_string("CallPointer"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("CallPointer")),
         .argument_count = 1,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER },
         .opcode = 0x37,
     };
     specifications[3] = (OpcodeSpecification){
@@ -38,7 +38,7 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("JumpRegisterIfEqual"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfEqual")),
         .argument_count = 2,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER, ARGUMENT_TYPE_REGISTER },
         .opcode = 0x26,
     };
     specifications[5] = (OpcodeSpecification){
@@ -87,14 +87,14 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("MoveTargetPointer"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MoveTargetPointer")),
         .argument_count = 2,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_POINTER },
         .opcode = 0x4,
     };
     specifications[12] = (OpcodeSpecification){
         .name = string_view_from_string("JumpRegisterIfZero"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfZero")),
         .argument_count = 1,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER },
         .opcode = 0x2b,
     };
     specifications[13] = (OpcodeSpecification){
@@ -108,7 +108,7 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("JumpRegisterIfLessThanOrEqual"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfLessThanOrEqual")),
         .argument_count = 2,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER, ARGUMENT_TYPE_REGISTER },
         .opcode = 0x2a,
     };
     specifications[15] = (OpcodeSpecification){
@@ -150,7 +150,7 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("JumpRegisterIfNotCarry"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfNotCarry")),
         .argument_count = 1,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER },
         .opcode = 0x2e,
     };
     specifications[21] = (OpcodeSpecification){
@@ -164,7 +164,7 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("JumpRegisterIfGreaterThan"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfGreaterThan")),
         .argument_count = 2,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER, ARGUMENT_TYPE_REGISTER },
         .opcode = 0x27,
     };
     specifications[23] = (OpcodeSpecification){
@@ -178,7 +178,7 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("JumpRegisterIfCarry"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfCarry")),
         .argument_count = 1,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER },
         .opcode = 0x2d,
     };
     specifications[25] = (OpcodeSpecification){
@@ -206,7 +206,7 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("MovePointerSource"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MovePointerSource")),
         .argument_count = 2,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER, ARGUMENT_TYPE_REGISTER },
         .opcode = 0x5,
     };
     specifications[29] = (OpcodeSpecification){
@@ -332,14 +332,14 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("JumpRegisterIfLessThan"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfLessThan")),
         .argument_count = 2,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER, ARGUMENT_TYPE_REGISTER },
         .opcode = 0x28,
     };
     specifications[47] = (OpcodeSpecification){
         .name = string_view_from_string("JumpRegisterIfNotZero"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfNotZero")),
         .argument_count = 1,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER },
         .opcode = 0x2c,
     };
     specifications[48] = (OpcodeSpecification){
@@ -388,14 +388,14 @@ OpcodeList opcode_specifications() {
         .name = string_view_from_string("JumpRegisterIfGreaterThanOrEqual"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfGreaterThanOrEqual")),
         .argument_count = 2,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER, ARGUMENT_TYPE_REGISTER },
         .opcode = 0x29,
     };
     specifications[55] = (OpcodeSpecification){
         .name = string_view_from_string("JumpRegisterIfDivideByZero"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfDivideByZero")),
         .argument_count = 1,
-        .required_arguments = { ARGUMENT_TYPE_REGISTER },
+        .required_arguments = { ARGUMENT_TYPE_POINTER },
         .opcode = 0x2f,
     };
     specifications[56] = (OpcodeSpecification){
