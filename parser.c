@@ -143,24 +143,43 @@ ByteVector cleanup_state() {
     return state.machine_code;
 }
 
-bool do_argument_types_match(
-    Token const * const mnemonic,
-    size_t const num_arguments,
-    OpcodeSpecification const * const opcode
-) {
-
+bool do_arguments_match(ArgumentType const lhs, ArgumentType const rhs) {
+    return lhs == rhs
+        || (lhs == ARGUMENT_TYPE_ADDRESS && rhs == ARGUMENT_TYPE_LABEL)
+        || (lhs == ARGUMENT_TYPE_LABEL && rhs == ARGUMENT_TYPE_ADDRESS);
 }
 
-OpcodeSpecification* find_opcode(Token const * const mnemonic, size_t const num_arguments) {
+bool do_argument_lists_match(
+    ArgumentVector const arguments,
+    OpcodeSpecification const * const opcode
+) {
+    assert(arguments.size == opcode->argument_count);
+    for (size_t i = 0; i < arguments.size; ++i) {
+        if (!do_arguments_match(arguments.data[i].type, opcode->required_arguments[arguments.size - i - 1])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+OpcodeSpecification* find_opcode(Token const * const mnemonic, ArgumentVector const arguments) {
     for (size_t i = 0; i < state.opcodes.num_specifications; ++i) {
         OpcodeSpecification const * const opcode = &state.opcodes.specifications[i];
         if (
-            opcode->argument_count == num_arguments
-            && string_view_compare(mnemonic->string_view, opcode->mnemonic)
+            opcode->argument_count == arguments.size
+            && string_view_compare_case_insensitive(mnemonic->string_view, opcode->mnemonic) != 0
         ) {
 
         }
+        if (
+            opcode->argument_count == arguments.size
+            && string_view_compare_case_insensitive(mnemonic->string_view, opcode->mnemonic) == 0
+            && do_argument_lists_match(arguments, opcode)
+        ) {
+            return opcode;
+        }
     }
+    return NULL;
 }
 
 void emit_instruction(Token const * const mnemonic, ArgumentVector const arguments) {
@@ -175,6 +194,17 @@ void emit_instruction(Token const * const mnemonic, ArgumentVector const argumen
             "\t%.*s\n",
             arguments.data[i].first_token->string_view.length,
             arguments.data[i].first_token->string_view.data
+        );
+    }
+    OpcodeSpecification const * const opcode = find_opcode(mnemonic, arguments);
+    if (opcode == NULL) {
+        printf("\t<no opcode found>\n");
+    } else {
+        printf(
+            "\tfound matching opcode: %.*s (0x%#.04x)\n",
+            opcode->name.length,
+            opcode->name.data,
+            opcode->opcode
         );
     }
 }

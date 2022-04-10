@@ -16,6 +16,6 @@ main:
    copy 0xAB0004, R20 // copy the value 0xAB0004 into register 20
    copy R0, *R20 // copy the value of register 0 into memory at the location stored in register 20
 
-   add R16, 4, R17
+   add 4, R16, R17
 
    jump main
