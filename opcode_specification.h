@@ -11,6 +11,7 @@ typedef enum {
     ARGUMENT_TYPE_ADDRESS,
     ARGUMENT_TYPE_REGISTER,
     ARGUMENT_TYPE_POINTER,
+    ARGUMENT_TYPE_LABEL,
     // TODO: Difference?
 } ArgumentType;
 

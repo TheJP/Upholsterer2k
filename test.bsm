@@ -2,10 +2,10 @@
 
 jump main
 
-error_string:
-    .string "Some error\n- or let's call it \"happy little accident\" -\noccured"
-one_big_number:
-    .words[1,2,3,4]
+//error_string:
+    //.string "Some error\n- or let's call it \"happy little accident\" -\noccured"
+//one_big_number:
+    //.words[1,2,3,4]
 
 main:
    copy 42, R0 // copy 42 into register 0
@@ -15,7 +15,6 @@ main:
 
    copy 0xAB0004, R20 // copy the value 0xAB0004 into register 20
    copy R0, *R20 // copy the value of register 0 into memory at the location stored in register 20
-   copy *fa, R16
 
    add R16, 4, R17
 

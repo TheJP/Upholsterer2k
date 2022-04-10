@@ -8,12 +8,20 @@
 CREATE_VECTOR_DEFINITION(ByteVector, uint8_t, byte_vector)
 
 typedef struct {
+    ArgumentType type;
+    Token* first_token;
+} Argument;
+
+typedef struct {
     StringView name;
     Address address;
 } Label;
 
 CREATE_VECTOR_DECLARATION(LabelVector, Label, label_vector)
 CREATE_VECTOR_DEFINITION(LabelVector, Label, label_vector)
+
+CREATE_VECTOR_DECLARATION(ArgumentVector, Argument, argument_vector);
+CREATE_VECTOR_DEFINITION(ArgumentVector, Argument, argument_vector);
 
 typedef struct {
     TokenVector tokens;
@@ -155,8 +163,20 @@ OpcodeSpecification* find_opcode(Token const * const mnemonic, size_t const num_
     }
 }
 
-void emit_instruction(Token const * const mnemonic, size_t const num_arguments) {
-
+void emit_instruction(Token const * const mnemonic, ArgumentVector const arguments) {
+    printf(
+        "should emit instruction for mnemonic %.*s with %zu arguments.\n",
+        mnemonic->string_view.length,
+        mnemonic->string_view.data,
+        arguments.size
+    );
+    for (size_t i = 0; i < arguments.size; ++i) {
+        printf(
+            "\t%.*s\n",
+            arguments.data[i].first_token->string_view.length,
+            arguments.data[i].first_token->string_view.data
+        );
+    }
 }
 
 ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeList const opcodes) {
@@ -177,12 +197,82 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
                 } else {
                     // instruction
                     Token const * const mnemonic = current();
+                    Token const* current_argument_start = NULL;
+                    ArgumentVector arguments = argument_vector_create();
+                    bool valid_argument_start_position = true;
                     next();
-                    while (current()->type != TOKEN_TYPE_EOF && current()->type != TOKEN_TYPE_NEWLINE) {
+                    while (true) {
+                        if (current()->type == TOKEN_TYPE_COMMA) {
+                            if (valid_argument_start_position) {
+                                error_on_current_token("unexpected comma");
+                            } else {
+                                next();
+                                valid_argument_start_position = true;
+                            }
+                        }
+                        if (current()->type == TOKEN_TYPE_ASTERISK) {
+                            // pointer or address
+                            current_argument_start = current();
+                        } else if (current()->type == TOKEN_TYPE_EOF || current()->type == TOKEN_TYPE_NEWLINE) {
+                            if (current_argument_start != NULL) {
+                                error_on_current_token("register of address expected");
+                            }
+                            break;
+                        } else {
+                            if (current_argument_start == NULL) {
+                                // no pointer and no address
+                                switch (current()->type) {
+                                    case TOKEN_TYPE_WORD_LITERAL:
+                                        argument_vector_push(&arguments, (Argument){
+                                            .type = ARGUMENT_TYPE_IMMEDIATE,
+                                            .first_token = current(),
+                                        });
+                                        valid_argument_start_position = false;
+                                        break;
+                                    case TOKEN_TYPE_REGISTER:
+                                        argument_vector_push(&arguments, (Argument){
+                                            .type = ARGUMENT_TYPE_REGISTER,
+                                            .first_token = current(),
+                                        });
+                                        valid_argument_start_position = false;
+                                        break;
+                                    case TOKEN_TYPE_IDENTIFIER:
+                                        argument_vector_push(&arguments, (Argument){
+                                            .type = ARGUMENT_TYPE_LABEL,
+                                            .first_token = current(),
+                                        });
+                                        valid_argument_start_position = false;
+                                        break;
+                                    default:
+                                        error_on_current_token("invalid argument");
+                                }
+                            } else {
+                                // second token of pointer or address
+                                switch (current()->type) {
+                                    case TOKEN_TYPE_WORD_LITERAL:
+                                        argument_vector_push(&arguments, (Argument){
+                                            .type = ARGUMENT_TYPE_ADDRESS,
+                                            .first_token = current_argument_start,
+                                        });
+                                        valid_argument_start_position = false;
+                                        break;
+                                    case TOKEN_TYPE_REGISTER:
+                                        argument_vector_push(&arguments, (Argument){
+                                            .type = ARGUMENT_TYPE_POINTER,
+                                            .first_token = current_argument_start,
+                                        });
+                                        valid_argument_start_position = false;
+                                        break;
+                                    default:
+                                        error_on_current_token("invalid argument");
+                                }
+                                current_argument_start = NULL;
+                            }
+                        }
                         next();
                     }
-                    size_t const num_arguments = current() - mnemonic - 1;
-                    emit_instruction(mnemonic, num_arguments);
+                    emit_instruction(mnemonic, arguments);
+                    argument_vector_free(&arguments);
                 }
                 break;
         }
