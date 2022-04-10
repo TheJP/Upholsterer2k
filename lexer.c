@@ -63,8 +63,8 @@ TokenVector tokenize(SourceFile const source_file) {
     }
     char* current = source_file.source.data;
     char* const end = source_file.source.data + source_file.source.length;
+    char* current_line_start = current;
     size_t line = 1;
-    size_t column = 1;
     while (current != end) {
         switch (*current) {
             case '\n':
@@ -75,12 +75,12 @@ TokenVector tokenize(SourceFile const source_file) {
                             .data = current,
                             .length = 1,
                         },
-                        .column = column,
+                        .column = (size_t)(current - current_line_start + 1),
                         .line = line,
                     });
                 }
                 ++line;
-                column = 0;
+                current_line_start = current + 1;
                 break;
             case '*':
                 token_vector_push(&tokens, (Token){
@@ -89,7 +89,7 @@ TokenVector tokenize(SourceFile const source_file) {
                         .data = current,
                         .length = 1,
                     },
-                    .column = column,
+                    .column = (size_t)(current - current_line_start + 1),
                     .line = line,
                 });
                 break;
@@ -100,7 +100,7 @@ TokenVector tokenize(SourceFile const source_file) {
                         .data = current,
                         .length = 1,
                     },
-                    .column = column,
+                    .column = (size_t)(current - current_line_start + 1),
                     .line = line,
                 });
                 break;
@@ -111,7 +111,7 @@ TokenVector tokenize(SourceFile const source_file) {
                         .data = current,
                         .length = 1,
                     },
-                    .column = column,
+                    .column = (size_t)(current - current_line_start + 1),
                     .line = line,
                 });
                 break;
@@ -122,7 +122,7 @@ TokenVector tokenize(SourceFile const source_file) {
                         .data = current,
                         .length = 1,
                     },
-                    .column = column,
+                    .column = (size_t)(current - current_line_start + 1),
                     .line = line,
                 });
                 break;
@@ -133,7 +133,7 @@ TokenVector tokenize(SourceFile const source_file) {
                         .data = current,
                         .length = 1,
                     },
-                    .column = column,
+                    .column = (size_t)(current - current_line_start + 1),
                     .line = line,
                 });
                 break;
@@ -144,54 +144,73 @@ TokenVector tokenize(SourceFile const source_file) {
                         .data = current,
                         .length = 1,
                     },
-                    .column = column,
+                    .column = (size_t)(current - current_line_start + 1),
                     .line = line,
                 });
                 break;
             case '/':
                 ++current;
                 if (current == end || *current != '/') {
-                    error(source_file, "'/' expected", line, column, 1);
+                    error(
+                        source_file,
+                        "'/' expected",
+                        line,
+                        (size_t)(current - current_line_start + 1),
+                        1
+                    );
                 }
                 while (current != end && *current != '\n') {
                     ++current;
                 }
                 ++line;
-                column = 0;
+                current_line_start = current + 1;
                 break;
             case '"': {
                 // string literals
                 char* const literal_start = current;
                 ++current;
-                ++column;
                 while (current != end && *current != '"' && is_valid_string_literal_char(*current)) {
                     if (*current == '\\') {
                         // escape sequence
                         if (current + 1 == end || !is_escape_sequence_char(*(current + 1))) {
-                            error(source_file, "invalid escape sequence", line, column, 1);
+                            error(
+                                source_file,
+                                "invalid escape sequence",
+                                line,
+                                (size_t)(current - current_line_start + 1),
+                                1
+                            );
                         }
                         ++current;
-                        ++column;
                     }
                     ++current;
-                    ++column;
                 }
                 if (!is_valid_string_literal_char(*current)) {
-                    error(source_file, "character not allowed in string literal", line, column, 1);
+                    error(
+                        source_file,
+                        "character not allowed in string literal",
+                        line,
+                        (size_t)(current - current_line_start + 1),
+                        1
+                    );
                 }
                 if (current == end || *current != '"') {
-                    error(source_file, "unterminated string literal", line, column, 1);
+                    error(
+                        source_file,
+                        "unterminated string literal",
+                        line,
+                        (size_t)(current - current_line_start + 1),
+                        1
+                    );
                 }
                 ++current;
-                ++column;
                 token_vector_push(&tokens, (Token){
                     .type = TOKEN_TYPE_STRING_LITERAL,
                     .string_view = string_view_from_pointers(literal_start, current),
-                    .column = column,
+                    .column = (size_t)(literal_start - current_line_start + 1),
                     .line = line,
                 });
                 --current;
-                --column;
                 break;
             }
             default:
@@ -201,19 +220,16 @@ TokenVector tokenize(SourceFile const source_file) {
                     // register
                     char* const register_start = current;
                     ++current;
-                    ++column;
                     while (current != end && isdigit(*current)) {
                         ++current;
-                        ++column;
                     }
                     token_vector_push(&tokens, (Token){
                         .type = TOKEN_TYPE_REGISTER,
                         .string_view = string_view_from_pointers(register_start, current),
                         .line = line,
-                        .column = column,
+                        .column = (size_t)(register_start - current_line_start + 1),
                     });
                     --current;
-                    --column;
                 } else if (isdigit(*current)) {
                     // word literal
                     if (current + 1 == end) {
@@ -224,23 +240,20 @@ TokenVector tokenize(SourceFile const source_file) {
                                 .data = current,
                                 .length = 1,
                             },
-                            .column = column,
+                            .column = (size_t)(current - current_line_start + 1),
                             .line = line,
                         });
                     } else {
                         char* const literal_start = current;
                         ++current;
-                        ++column;
                         WordLiteralType word_literal_type;
                         switch (*current) {
                             case 'x':
                                 ++current;
-                                ++column;
                                 word_literal_type = HEXADECIMAL;
                                 break;
                             case 'b':
                                 ++current;
-                                ++column;
                                 word_literal_type = BINARY;
                                 break;
                             default:
@@ -249,11 +262,16 @@ TokenVector tokenize(SourceFile const source_file) {
                         }
                         while (current != end && is_valid_digit(*current, word_literal_type)) {
                             ++current;
-                            ++column;
                         }
                         size_t const literal_length = (size_t)(current - literal_start);
                         if (literal_length < minimum_required_length(word_literal_type)) {
-                            error(source_file, "end of word literal unexpected", line, column, 1);
+                            error(
+                                source_file,
+                                "end of word literal unexpected",
+                                line,
+                                (size_t)(current - current_line_start + 1),
+                                1
+                            );
                         }
                         token_vector_push(&tokens, (Token){
                             .type = TOKEN_TYPE_WORD_LITERAL,
@@ -261,36 +279,37 @@ TokenVector tokenize(SourceFile const source_file) {
                                 .data = literal_start,
                                 .length = literal_length,
                             },
-                            .column = column,
+                            .column = (size_t)(literal_start - current_line_start + 1),
                             .line = line,
                         });
                         --current;
-                        --column;
                     }
                 } else if (is_valid_identifier_start_char(*current)) {
                     // identifier
                     char* const identifier_start = current;
                     ++current;
-                    ++column;
                     while (current != end && is_valid_identifier_inner_char(*current)) {
                         ++current;
-                        ++column;
                     }
                     token_vector_push(&tokens, (Token){
                         .type = TOKEN_TYPE_IDENTIFIER,
                         .string_view = string_view_from_pointers(identifier_start, current),
                         .line = line,
-                        .column = column,
+                        .column = (size_t)(identifier_start - current_line_start + 1),
                     });
                     --current;
-                    --column;
                 } else {
-                    error(source_file, "unexpected input", line, column, 1);
+                    error(
+                        source_file,
+                        "unexpected input",
+                        line,
+                        (size_t)(current - current_line_start + 1),
+                        1
+                    );
                 }
                 break;
         }
         ++current;
-        ++column;
     }
     token_vector_push(&tokens, (Token){
         .type = TOKEN_TYPE_EOF,
@@ -298,7 +317,7 @@ TokenVector tokenize(SourceFile const source_file) {
             .data = NULL,
             .length = 0,
         },
-        .column = column,
+        .column = (size_t)(current - current_line_start + 1),
         .line = line,
     });
     return tokens;
