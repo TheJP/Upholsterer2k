@@ -77,7 +77,15 @@ int main(int argc, char** argv) {
 
     OpcodeList opcodes = opcode_specifications();
     for (size_t i = 0; i < opcodes.num_specifications; ++i) {
-        printf("%s (0x%04lX)\n", opcodes.specifications[i].name, opcodes.specifications[i].opcode);
+        OpcodeSpecification const * const specification = &opcodes.specifications[i];
+        printf(
+            "%.*s (0x%04lX) -> %.*s\n",
+            (int)specification->name.length,
+            specification->name.data,
+            specification->opcode,
+            (int)specification->mnemonic.length,
+            specification->mnemonic.data
+        );
     }
     free(opcodes.specifications);
     return EXIT_SUCCESS;

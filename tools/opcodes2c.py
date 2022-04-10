@@ -18,6 +18,7 @@ def main():
                     out_file.write("""// auto-generated with opcodes2c.py
 
 #include "opcodes.h"
+#include "string_view.h"
 
 OpcodeList opcode_specifications() {\n""")
                     out_file.write(f"    size_t const num_opcodes = {num_opcodes};\n")
@@ -27,8 +28,8 @@ OpcodeList opcode_specifications() {\n""")
                         if data["opcodes"][opcode]["opcode_type"] != None:
                             argument_count += 1
                         out_file.write(f"    specifications[{i}] = (OpcodeSpecification){{\n")
-                        out_file.write(f"        .name = \"{opcode}\",\n")
-                        out_file.write(f"        .mnemonic = opcode_to_mnemonic(\"{opcode}\"),\n")
+                        out_file.write(f"        .name = string_view_from_string(\"{opcode}\"),\n")
+                        out_file.write(f"        .mnemonic = opcode_to_mnemonic(string_view_from_string(\"{opcode}\")),\n")
                         out_file.write(f"        .argument_count = {argument_count},\n")
                         out_file.write(f"        .required_arguments = {{ ")
                         arguments = list(map(lambda register : "ARGUMENT_TYPE_POINTER" if register[1] == "pointer" else "ARGUMENT_TYPE_REGISTER", data["opcodes"][opcode]["registers"]))
