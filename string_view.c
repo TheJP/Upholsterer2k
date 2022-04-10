@@ -27,7 +27,8 @@ int string_view_compare(StringView const lhs, StringView const rhs) {
     }
     if (lhs.length > rhs.length) {
         return 1;
-    } else if (lhs.length < rhs.length) {
+    }
+    if (lhs.length < rhs.length) {
         return -1;
     }
     return 0;
