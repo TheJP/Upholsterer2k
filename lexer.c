@@ -171,8 +171,7 @@ TokenVector tokenize(SourceFile const source_file) {
                         1
                     );
                 }
-                ++line;
-                current_line_start = current + 1;
+                --current;
                 break;
             case '"': {
                 // string literals
