@@ -24,7 +24,7 @@ name prefix##_create(void) { \
     }; \
 } \
  \
-static void grow(name* const vector) { \
+static void prefix##grow(name* const vector) { \
     vector->capacity = vector->capacity == 0 ? 1 : vector->capacity * 2; \
     element_type* new_data = realloc(vector->data, sizeof(element_type) * vector->capacity); \
     if (!new_data) { \
@@ -38,7 +38,7 @@ static void grow(name* const vector) { \
 void prefix##_push(name* const vector, element_type element_type) { \
     bool const needs_to_grow = vector->size == vector->capacity; \
     if (needs_to_grow) { \
-        grow(vector); \
+        prefix##grow(vector); \
     } \
     vector->data[vector->size] = element_type; \
     ++vector->size; \

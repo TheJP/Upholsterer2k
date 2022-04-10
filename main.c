@@ -7,6 +7,7 @@
 #include "string_view.h"
 #include "source_file.h"
 #include "opcodes.h"
+#include "parser.h"
 
 StringView read_whole_file(FILE* const file) {
     size_t capacity = 0;
@@ -35,6 +36,13 @@ StringView read_whole_file(FILE* const file) {
     };
 }
 
+void check_opcodes(OpcodeList const opcodes) {
+    for (size_t i = 0; i < opcodes.num_specifications; ++i) {
+        OpcodeSpecification const * const specification = &opcodes.specifications[i];
+        assert(specification->mnemonic.length > 0 && "unknown opcode");
+    }
+}
+
 int main(int argc, char** argv) {
     StringView source = { 0 };
     if (argc == 1) {
@@ -58,37 +66,15 @@ int main(int argc, char** argv) {
 
     TokenVector tokens = tokenize(source_file);
 
-    for (size_t i = 0; i < tokens.size; ++i) {
-        printf("%s", token_type_to_string(tokens.data[i].type));
-        switch (tokens.data[i].type) {
-            case TOKEN_TYPE_WORD_LITERAL:
-            case TOKEN_TYPE_REGISTER:
-            case TOKEN_TYPE_IDENTIFIER:
-            case TOKEN_TYPE_STRING_LITERAL:
-                printf(" (%.*s)", (int)tokens.data[i].string_view.length, tokens.data[i].string_view.data);
-                break;
-            default:
-                break;
-        }
-        printf("\n");
-    }
+    OpcodeList opcodes = opcode_specifications();
+    check_opcodes(opcodes);
 
+    ByteVector machine_code = parse(source_file, tokens, opcodes);
+
+    // cleanup
+    byte_vector_free(&machine_code);
     token_vector_free(&tokens);
     free(source.data);
-
-    OpcodeList opcodes = opcode_specifications();
-    for (size_t i = 0; i < opcodes.num_specifications; ++i) {
-        OpcodeSpecification const * const specification = &opcodes.specifications[i];
-        assert(specification->mnemonic.length > 0 && "unknown opcode");
-        printf(
-            "%.*s (0x%04lX) -> %.*s\n",
-            (int)specification->name.length,
-            specification->name.data,
-            specification->opcode,
-            (int)specification->mnemonic.length,
-            specification->mnemonic.data
-        );
-    }
     free(opcodes.specifications);
     return EXIT_SUCCESS;
 }
