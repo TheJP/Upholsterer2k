@@ -36,6 +36,7 @@ add_executable (
     "opcode_specification.c"
     "opcodes.h"
     "opcodes.c"
+    "vector.h"
 )
 
 # set binary filenames
