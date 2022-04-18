@@ -171,12 +171,6 @@ OpcodeSpecification const* find_opcode(Token const * const mnemonic, ArgumentVec
         OpcodeSpecification const * const opcode = &state.opcodes.specifications[i];
         if (
             opcode->argument_count == arguments.size
-            && string_view_compare_case_insensitive(mnemonic->string_view, opcode->mnemonic) != 0
-        ) {
-
-        }
-        if (
-            opcode->argument_count == arguments.size
             && string_view_compare_case_insensitive(mnemonic->string_view, opcode->mnemonic) == 0
             && do_argument_lists_match(arguments, opcode)
         ) {
