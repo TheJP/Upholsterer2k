@@ -230,6 +230,9 @@ void parse_instruction() {
             }
         }
         if (current()->type == TOKEN_TYPE_ASTERISK) {
+            if (!valid_argument_start_position) {
+                error_on_current_token("comma expected");
+            }
             // pointer or address
             current_argument_start = current();
         } else if (current()->type == TOKEN_TYPE_EOF || current()->type == TOKEN_TYPE_NEWLINE) {
@@ -239,6 +242,9 @@ void parse_instruction() {
             break;
         } else {
             if (current_argument_start == NULL) {
+                if (!valid_argument_start_position) {
+                    error_on_current_token("comma expected");
+                }
                 // no pointer and no address
                 switch (current()->type) {
                     case TOKEN_TYPE_WORD_LITERAL:
