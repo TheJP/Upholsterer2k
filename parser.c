@@ -235,7 +235,9 @@ void parse_instruction() {
             }
             // pointer or address
             current_argument_start = current();
-        } else if (current()->type == TOKEN_TYPE_EOF || current()->type == TOKEN_TYPE_NEWLINE) {
+        } else if (current()->type == TOKEN_TYPE_EOF) {
+            error(state.source_file, "unexpected end of file", current()->line, current()->column, 1);
+        } else if (current()->type == TOKEN_TYPE_NEWLINE) {
             if (current_argument_start != NULL) {
                 error_on_current_token("register or address expected");
             }
