@@ -74,7 +74,7 @@ void parse_word_with_base(StringView const string_view, Base const base, bool* o
         result += char_value(string_view.data[index]) * current_factor;
         current_factor *= (uint64_t)base;
     }
-    if (result > 0xFFFF) {
+    if (result > 0xFFFFFFFF) {
         *out_success = false;
         return;
     }
@@ -113,13 +113,14 @@ void parse_word(StringView const string_view, bool* out_success, Word* out_resul
                 );
                 break;
         }
+    } else {
+        parse_word_with_base(
+            string_view,
+            BASE_DECIMAL,
+            &conversion_success,
+            &conversion_result
+        );
     }
-    parse_word_with_base(
-        string_view,
-        BASE_DECIMAL,
-        &conversion_success,
-        &conversion_result
-    );
     if (conversion_success) {
         *out_result = conversion_result;
     }
