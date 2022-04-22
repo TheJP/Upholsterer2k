@@ -208,10 +208,14 @@ void emit_instruction(Token const * const mnemonic, ArgumentVector const argumen
 }
 
 void parse_label() {
+    assert(peek()->type == TOKEN_TYPE_COLON);
     if (!register_label(identifier_from_token(current()))) {
         error_on_current_token("label redefinition");
     }
-    next(); // consume colon following label name
+    next(); // proceed to colon token
+    if (peek()->type != TOKEN_TYPE_NEWLINE) {
+        error_on_current_token("newline expected after label definition");
+    }
 }
 
 void parse_instruction() {
