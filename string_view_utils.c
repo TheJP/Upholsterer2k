@@ -106,7 +106,7 @@ void parse_word(StringView const string_view, bool* out_success, Word* out_resul
                 break;
             default:
                 parse_word_with_base(
-                    strip_prefix(string_view),
+                    string_view,
                     BASE_DECIMAL,
                     &conversion_success,
                     &conversion_result
@@ -115,7 +115,7 @@ void parse_word(StringView const string_view, bool* out_success, Word* out_resul
         }
     }
     parse_word_with_base(
-        strip_prefix(string_view),
+        string_view,
         BASE_DECIMAL,
         &conversion_success,
         &conversion_result
