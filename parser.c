@@ -42,15 +42,15 @@ typedef struct {
 
 static ParserState state;
 
-Token* current() {
+static Token* current() {
     return &state.tokens.data[state.current];
 }
 
-Token* peek() {
+static Token* peek() {
     return state.current == state.tokens.size - 1 ? NULL : &state.tokens.data[state.current + 1];
 }
 
-Token* next() {
+static Token* next() {
     if (state.current == state.tokens.size - 1) {
         return NULL;
     }
@@ -58,7 +58,7 @@ Token* next() {
     return current();
 }
 
-U32Bytes u32_to_big_endian(uint32_t value) {
+static U32Bytes u32_to_big_endian(uint32_t value) {
     return (U32Bytes){
         .bytes = {
             (uint8_t)(value >> 24),
@@ -69,7 +69,7 @@ U32Bytes u32_to_big_endian(uint32_t value) {
     };
 }
 
-U64Bytes u64_to_big_endian(uint64_t value) {
+static U64Bytes u64_to_big_endian(uint64_t value) {
     return (U64Bytes){
         .bytes = {
             (uint8_t)(value >> 56),
@@ -84,7 +84,7 @@ U64Bytes u64_to_big_endian(uint64_t value) {
     };
 }
 
-void emit_u32(uint32_t value) {
+static void emit_u32(uint32_t value) {
     U32Bytes const bytes = u32_to_big_endian(value);
     byte_vector_push(&state.machine_code, bytes.bytes[0]);
     byte_vector_push(&state.machine_code, bytes.bytes[1]);
@@ -92,7 +92,7 @@ void emit_u32(uint32_t value) {
     byte_vector_push(&state.machine_code, bytes.bytes[3]);
 }
 
-void emit_u64(uint64_t value) {
+static void emit_u64(uint64_t value) {
     U64Bytes const bytes = u64_to_big_endian(value);
     byte_vector_push(&state.machine_code, bytes.bytes[0]);
     byte_vector_push(&state.machine_code, bytes.bytes[1]);
@@ -104,7 +104,7 @@ void emit_u64(uint64_t value) {
     byte_vector_push(&state.machine_code, bytes.bytes[7]);
 }
 
-bool register_label(StringView label_name) {
+static bool register_label(StringView label_name) {
     for (size_t i = 0; i < state.labels.size; ++i) {
         if (string_view_compare(label_name, state.labels.data[i].name) == 0) {
             return false;
@@ -117,7 +117,7 @@ bool register_label(StringView label_name) {
     return true;
 }
 
-void error_on_token(char const * const message, Token const * const token) {
+static void error_on_token(char const * const message, Token const * const token) {
     error(
         state.source_file,
         message,
@@ -127,11 +127,11 @@ void error_on_token(char const * const message, Token const * const token) {
     );
 }
 
-void error_on_current_token(char const * const message) {
+static void error_on_current_token(char const * const message) {
     error_on_token(message, current());
 }
 
-void init_state(SourceFile const source_file, TokenVector const tokens, OpcodeList const opcodes) {
+static void init_state(SourceFile const source_file, TokenVector const tokens, OpcodeList const opcodes) {
     state = (ParserState){
         .tokens = tokens,
         .opcodes = opcodes,
@@ -142,18 +142,18 @@ void init_state(SourceFile const source_file, TokenVector const tokens, OpcodeLi
     };
 }
 
-ByteVector cleanup_state() {
+static ByteVector cleanup_state() {
     label_vector_free(&state.labels);
     return state.machine_code;
 }
 
-bool do_arguments_match(ArgumentType const lhs, ArgumentType const rhs) {
+static bool do_arguments_match(ArgumentType const lhs, ArgumentType const rhs) {
     return lhs == rhs
         || (lhs == ARGUMENT_TYPE_ADDRESS && rhs == ARGUMENT_TYPE_LABEL)
         || (lhs == ARGUMENT_TYPE_LABEL && rhs == ARGUMENT_TYPE_ADDRESS);
 }
 
-bool do_argument_lists_match(
+static bool do_argument_lists_match(
     ArgumentVector const arguments,
     OpcodeSpecification const * const opcode
 ) {
@@ -166,7 +166,7 @@ bool do_argument_lists_match(
     return true;
 }
 
-OpcodeSpecification const* find_opcode(Token const * const mnemonic, ArgumentVector const arguments) {
+static OpcodeSpecification const* find_opcode(Token const * const mnemonic, ArgumentVector const arguments) {
     for (size_t i = 0; i < state.opcodes.num_specifications; ++i) {
         OpcodeSpecification const * const opcode = &state.opcodes.specifications[i];
         if (
@@ -180,7 +180,7 @@ OpcodeSpecification const* find_opcode(Token const * const mnemonic, ArgumentVec
     return NULL;
 }
 
-void emit_instruction(Token const * const mnemonic, ArgumentVector const arguments) {
+static void emit_instruction(Token const * const mnemonic, ArgumentVector const arguments) {
     printf(
         "should emit instruction for mnemonic %.*s with %zu arguments.\n",
         (int)mnemonic->string_view.length,
@@ -207,7 +207,7 @@ void emit_instruction(Token const * const mnemonic, ArgumentVector const argumen
     }
 }
 
-void parse_label() {
+static void parse_label() {
     assert(peek()->type == TOKEN_TYPE_COLON);
     if (!register_label(identifier_from_token(current()))) {
         error_on_current_token("label redefinition");
@@ -218,7 +218,7 @@ void parse_label() {
     }
 }
 
-void parse_instruction() {
+static void parse_instruction() {
     Token const * const mnemonic = current();
     Token const* current_argument_start = NULL;
     ArgumentVector arguments = argument_vector_create();
@@ -306,7 +306,7 @@ void parse_instruction() {
     argument_vector_free(&arguments);
 }
 
-void parse_identifier() {
+static void parse_identifier() {
     assert(current()->type == TOKEN_TYPE_IDENTIFIER);
     if (peek()->type == TOKEN_TYPE_COLON) {
         parse_label();
