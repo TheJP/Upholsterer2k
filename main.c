@@ -36,6 +36,10 @@ StringView read_whole_file(FILE* const file) {
     };
 }
 
+void write_machine_code(ByteVector machine_code, FILE* const file) {
+    fwrite(machine_code.data, sizeof(uint8_t), machine_code.size, file);
+}
+
 void check_opcodes(OpcodeList const opcodes) {
     for (size_t i = 0; i < opcodes.num_specifications; ++i) {
         OpcodeSpecification const * const specification = &opcodes.specifications[i];
@@ -70,6 +74,8 @@ int main(int argc, char** argv) {
     check_opcodes(opcodes);
 
     ByteVector machine_code = parse(source_file, tokens, opcodes);
+
+    write_machine_code(machine_code, stdout);
 
     // cleanup
     byte_vector_free(&machine_code);
