@@ -181,14 +181,16 @@ static OpcodeSpecification const* find_opcode(Token const * const mnemonic, Argu
 }
 
 static void emit_instruction(Token const * const mnemonic, ArgumentVector const arguments) {
-    printf(
+    fprintf(
+        stderr,
         "should emit instruction for mnemonic %.*s with %zu arguments.\n",
         (int)mnemonic->string_view.length,
         mnemonic->string_view.data,
         arguments.size
     );
     for (size_t i = 0; i < arguments.size; ++i) {
-        printf(
+        fprintf(
+            stderr,
             "\t%.*s\n",
             (int)arguments.data[i].first_token->string_view.length,
             arguments.data[i].first_token->string_view.data
@@ -198,7 +200,8 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
     if (opcode == NULL) {
         error_on_token("unknown instruction or invalid arguments", mnemonic);
     } else {
-        printf(
+        fprintf(
+            stderr,
             "\tfound matching opcode: %.*s (%#.04x)\n",
             (int)opcode->name.length,
             opcode->name.data,
