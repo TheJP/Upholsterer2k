@@ -42,15 +42,15 @@ typedef struct {
 
 static ParserState state;
 
-static Token* current() {
+static Token* current(void) {
     return &state.tokens.data[state.current];
 }
 
-static Token* peek() {
+static Token* peek(void) {
     return state.current == state.tokens.size - 1 ? NULL : &state.tokens.data[state.current + 1];
 }
 
-static Token* next() {
+static Token* next(void) {
     if (state.current == state.tokens.size - 1) {
         return NULL;
     }
@@ -142,7 +142,7 @@ static void init_state(SourceFile const source_file, TokenVector const tokens, O
     };
 }
 
-static ByteVector cleanup_state() {
+static ByteVector cleanup_state(void) {
     label_vector_free(&state.labels);
     return state.machine_code;
 }
@@ -207,7 +207,7 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
     }
 }
 
-static void parse_label() {
+static void parse_label(void) {
     assert(peek()->type == TOKEN_TYPE_COLON);
     if (!register_label(identifier_from_token(current()))) {
         error_on_current_token("label redefinition");
@@ -218,7 +218,7 @@ static void parse_label() {
     }
 }
 
-static void parse_instruction() {
+static void parse_instruction(void) {
     Token const * const mnemonic = current();
     Token const* current_argument_start = NULL;
     ArgumentVector arguments = argument_vector_create();
@@ -306,7 +306,7 @@ static void parse_instruction() {
     argument_vector_free(&arguments);
 }
 
-static void parse_identifier() {
+static void parse_identifier(void) {
     assert(current()->type == TOKEN_TYPE_IDENTIFIER);
     if (peek()->type == TOKEN_TYPE_COLON) {
         parse_label();
@@ -326,6 +326,9 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
         switch (current()->type) {
             case TOKEN_TYPE_IDENTIFIER:
                 parse_identifier();
+                break;
+            case TOKEN_TYPE_DOT:
+
                 break;
             case TOKEN_TYPE_NEWLINE:
                 break;
