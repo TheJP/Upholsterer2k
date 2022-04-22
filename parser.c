@@ -4,6 +4,7 @@
 #include "constants.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <inttypes.h>
 
 CREATE_VECTOR_DEFINITION(ByteVector, uint8_t, byte_vector)
 
@@ -318,6 +319,118 @@ static void parse_identifier(void) {
     }
 }
 
+static void parse_word_literal(void) {
+    if (current()->type != TOKEN_TYPE_WORD_LITERAL) {
+        error_on_current_token("expected word literal");
+    }
+    bool success;
+    Word result;
+    word_from_token(current(), &success, &result);
+    assert(success); // lexer should only tokenize word literals if they are valid
+    emit_u32(result);
+    fprintf(stderr, "should emit word literal: %"PRIu32"\n", result);
+    next();
+}
+
+static void parse_words_literal(void) {
+    assert(current()->type == TOKEN_TYPE_IDENTIFIER);
+    assert(string_view_compare_case_insensitive(current()->string_view, string_view_from_string("words")) == 0);
+    next();
+    if (current()->type != TOKEN_TYPE_LEFT_BRACKET) {
+        error_on_current_token("\"[\" expected");
+    }
+    next();
+    parse_word_literal();
+    while (current()->type == TOKEN_TYPE_COMMA) {
+        next();
+        if (current()->type == TOKEN_TYPE_RIGHT_BRACKET) {
+            break;
+        }
+        parse_word_literal();
+    }
+    if (current()->type != TOKEN_TYPE_RIGHT_BRACKET) {
+        error_on_current_token("\"]\" expected");
+    }
+    next();
+    if (current()->type != TOKEN_TYPE_NEWLINE) {
+        error_on_current_token("newline expected after words literal");
+    }
+}
+
+static void emit_quoted_escaped_string(StringView string) {
+    char const* current = string.data + 1;
+    char const * const end = string.data + string.length - 1;
+    while (current != end) {
+        switch (*current) {
+            case '\\':
+                ++current;
+                assert(current != end); // the lexer already checks for valid escaping
+                switch (*current) {
+                    case '"':
+                        emit_u32((Word)'"');
+                        break;
+                    case '\\':
+                        emit_u32((Word)'\\');
+                        break;
+                    case 't':
+                        emit_u32((Word)'\t');
+                        break;
+                    case 'n':
+                        emit_u32((Word)'\n');
+                        break;
+                    case 'v':
+                        emit_u32((Word)'\v');
+                        break;
+                    case 'f':
+                        emit_u32((Word)'\f');
+                        break;
+                    case 'r':
+                        emit_u32((Word)'\r');
+                        break;
+                    default:
+                        assert(false && "invalid escape sequence"); // should be caught by the lexer
+                        break;
+                }
+                break;
+            default:
+                emit_u32((Word)*current);
+                break;
+        }
+        ++current;
+    }
+}
+
+static void parse_string_literal(void) {
+    assert(current()->type == TOKEN_TYPE_IDENTIFIER);
+    assert(string_view_compare_case_insensitive(current()->string_view, string_view_from_string("string")) == 0);
+    next();
+    if (current()->type != TOKEN_TYPE_STRING_LITERAL) {
+        error_on_current_token("string literal expected");
+    }
+    fprintf(stderr, "should emit string literal: %.*s\n", (int)current()->string_view.length, current()->string_view.data);
+    emit_quoted_escaped_string(current()->string_view);
+    next();
+    if (current()->type != TOKEN_TYPE_NEWLINE) {
+        error_on_current_token("newline expected after string literal");
+    }
+}
+
+static void parse_literal(void) {
+    assert(current()->type == TOKEN_TYPE_DOT);
+    next();
+    if (current()->type != TOKEN_TYPE_IDENTIFIER) {
+        error_on_current_token("expected literal");
+    }
+
+    if (string_view_compare_case_insensitive(current()->string_view, string_view_from_string("words")) == 0) {
+        parse_words_literal();
+    } else if (string_view_compare_case_insensitive(current()->string_view, string_view_from_string("string")) == 0) {
+        parse_string_literal();
+    } else {
+        error_on_current_token("expected either \"words\" or \"string\"");
+    }
+}
+
 ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeList const opcodes) {
     assert(tokens.size > 0);
     assert(tokens.data[tokens.size - 1].type == TOKEN_TYPE_EOF);
@@ -331,7 +444,7 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
                 parse_identifier();
                 break;
             case TOKEN_TYPE_DOT:
-
+                parse_literal();
                 break;
             case TOKEN_TYPE_NEWLINE:
                 break;
