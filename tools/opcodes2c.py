@@ -29,7 +29,7 @@ def main():
 #include "opcodes.h"
 #include "string_view.h"
 
-OpcodeList opcode_specifications() {\n""")
+OpcodeList opcode_specifications(void) {\n""")
                     out_file.write(f"    size_t const num_opcodes = {num_opcodes};\n")
                     out_file.write("    OpcodeSpecification* specifications = malloc(num_opcodes * sizeof(*specifications));\n")
                     for i, opcode in enumerate(data["opcodes"]):

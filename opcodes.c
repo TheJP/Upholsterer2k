@@ -3,7 +3,7 @@
 #include "opcodes.h"
 #include "string_view.h"
 
-OpcodeList opcode_specifications() {
+OpcodeList opcode_specifications(void) {
     size_t const num_opcodes = 60;
     OpcodeSpecification* specifications = malloc(num_opcodes * sizeof(*specifications));
     specifications[0] = (OpcodeSpecification){
