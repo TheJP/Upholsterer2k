@@ -197,18 +197,64 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
             arguments.data[i].first_token->string_view.data
         );
     }
-    OpcodeSpecification const * const opcode = find_opcode(mnemonic, arguments);
-    if (opcode == NULL) {
+    OpcodeSpecification const * const opcode_specification = find_opcode(mnemonic, arguments);
+    if (opcode_specification == NULL) {
         error_on_token("unknown instruction or invalid arguments", mnemonic);
     } else {
         fprintf(
             stderr,
             "\tfound matching opcode: %.*s (%#.04x)\n",
-            (int)opcode->name.length,
-            opcode->name.data,
-            opcode->opcode
+            (int)opcode_specification->name.length,
+            opcode_specification->name.data,
+            opcode_specification->opcode
         );
     }
+
+    Instruction instruction = ((Instruction)opcode_specification->opcode) << 48;
+
+    bool success;
+    Word word_result;
+    Register register_result;
+    size_t shift_offset = 40;
+    for (size_t i = 0; i < arguments.size; ++i) {
+        size_t index = arguments.size - i - 1;
+        switch (arguments.data[index].type) {
+            case ARGUMENT_TYPE_ADDRESS:
+                assert(arguments.data[index].first_token->type == TOKEN_TYPE_ASTERISK);
+                word_from_token(arguments.data[index].first_token + 1, &success, &word_result);
+                fprintf(stderr, "%.*s\n", (int)(arguments.data[index].first_token + 1)->string_view.length,
+                (arguments.data[index].first_token + 1)->string_view.data);
+                assert(success);
+                instruction |= word_result;
+                break;
+            case ARGUMENT_TYPE_IMMEDIATE:
+                word_from_token(arguments.data[index].first_token, &success, &word_result);
+                assert(success); // should've been checked before
+                instruction |= word_result;
+                break;
+            case ARGUMENT_TYPE_LABEL:
+                assert(false && "not implemented");
+                break;
+            case ARGUMENT_TYPE_NONE:
+                assert(false && "unreachable");
+                break;
+            case ARGUMENT_TYPE_POINTER:
+                assert(arguments.data[index].first_token->type == TOKEN_TYPE_ASTERISK);
+                register_from_token(arguments.data[index].first_token + 1, &success, &register_result);
+                assert(success);
+                instruction |= ((Instruction)register_result) << shift_offset;
+                shift_offset -= 8;
+                break;
+            case ARGUMENT_TYPE_REGISTER:
+                register_from_token(arguments.data[index].first_token, &success, &register_result);
+                assert(success);
+                instruction |= ((Instruction)register_result) << shift_offset;
+                shift_offset -= 8;
+                break;
+        }
+    }
+
+    emit_u64(instruction);
 }
 
 static void parse_label(void) {
