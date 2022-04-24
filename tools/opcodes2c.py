@@ -1,12 +1,12 @@
 import sys
 import json
 
-def argument_as_c_enum(argument):
+def argument_as_c_enum(opcode_type, argument):
     if "Register" in argument:
-        return "ARGUMENT_TYPE_REGISTER" if argument["Register"][1] != "pointer" else "ARGUMENT_TYPE_POINTER"
+        return "ARGUMENT_TYPE_REGISTER" if argument["Register"][1] != "pointer" else "ARGUMENT_TYPE_REGISTER_POINTER"
     argument_mappings = {
         "Immediate": "ARGUMENT_TYPE_IMMEDIATE",
-        "Address": "ARGUMENT_TYPE_ADDRESS",
+        "Address": "ARGUMENT_TYPE_ADDRESS_POINTER",
     }
     return argument_mappings[argument]
 
@@ -39,7 +39,7 @@ OpcodeList opcode_specifications(void) {\n""")
                         out_file.write(f"        .mnemonic = opcode_to_mnemonic(string_view_from_string(\"{opcode}\")),\n")
                         out_file.write(f"        .argument_count = {argument_count},\n")
                         out_file.write(f"        .required_arguments = {{ ")
-                        arguments = list(map(lambda argument : argument_as_c_enum(argument), data["opcodes"][opcode]["arguments"]))
+                        arguments = list(map(lambda argument : argument_as_c_enum(data["opcodes"][opcode]["opcode_type"], argument), data["opcodes"][opcode]["arguments"]))
                         out_file.write("ARGUMENT_TYPE_NONE" if len(arguments) == 0 else ', '.join(arguments))
                         out_file.write(f" }},\n")
                         opcode = data["opcodes"][opcode]["opcode"]

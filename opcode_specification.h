@@ -8,10 +8,9 @@
 typedef enum {
     ARGUMENT_TYPE_NONE,
     ARGUMENT_TYPE_IMMEDIATE,
-    ARGUMENT_TYPE_ADDRESS,
+    ARGUMENT_TYPE_ADDRESS_POINTER,
     ARGUMENT_TYPE_REGISTER,
-    ARGUMENT_TYPE_POINTER,
-    ARGUMENT_TYPE_LABEL,
+    ARGUMENT_TYPE_REGISTER_POINTER,
     // TODO: Difference?
 } ArgumentType;
 
@@ -54,20 +53,20 @@ typedef struct {
     X(CallRegister, CALL) \
     X(CallPointer, CALL) \
     X(Return, RETURN) \
-    X(JumpAddress, JUMP) \
+    X(JumpImmediate, JUMP) \
     X(JumpRegister, JUMP) \
 \
-    X(JumpAddressIfEqual, JUMP_EQ) \
-    X(JumpAddressIfGreaterThan, JUMP_GT) \
-    X(JumpAddressIfLessThan, JUMP_LT) \
-    X(JumpAddressIfGreaterThanOrEqual, JUMP_GTEQ) \
-    X(JumpAddressIfLessThanOrEqual, JUMP_LTEQ) \
-    X(JumpAddressIfZero, JUMP_ZERO) \
-    X(JumpAddressIfNotZero, JUMP_NOT_ZERO) \
-    X(JumpAddressIfCarry, JUMP_CARRY) \
-    X(JumpAddressIfNotCarry, JUMP_NOT_CARRY) \
-    X(JumpAddressIfDivideByZero, JUMP_DIVIDE_BY_ZERO) \
-    X(JumpAddressIfNotDivideByZero, JUMP_NOT_DIVIDE_BY_ZERO) \
+    X(JumpImmediateIfEqual, JUMP_EQ) \
+    X(JumpImmediateIfGreaterThan, JUMP_GT) \
+    X(JumpImmediateIfLessThan, JUMP_LT) \
+    X(JumpImmediateIfGreaterThanOrEqual, JUMP_GTEQ) \
+    X(JumpImmediateIfLessThanOrEqual, JUMP_LTEQ) \
+    X(JumpImmediateIfZero, JUMP_ZERO) \
+    X(JumpImmediateIfNotZero, JUMP_NOT_ZERO) \
+    X(JumpImmediateIfCarry, JUMP_CARRY) \
+    X(JumpImmediateIfNotCarry, JUMP_NOT_CARRY) \
+    X(JumpImmediateIfDivideByZero, JUMP_DIVIDE_BY_ZERO) \
+    X(JumpImmediateIfNotDivideByZero, JUMP_NOT_DIVIDE_BY_ZERO) \
 \
     X(JumpRegisterIfEqual, JUMP_EQ) \
     X(JumpRegisterIfGreaterThan, JUMP_GT) \
@@ -89,6 +88,6 @@ typedef struct {
     X(PollCycleCountHighLow, POLL_CYCLES) \
 \
     X(DumpRegisters, DUMP_REGISTERS) \
-    X(DumpMemory, DUMP_REGISTERS)
+    X(DumpMemory, DUMP_MEMORY)
 
 StringView opcode_to_mnemonic(StringView opcode);

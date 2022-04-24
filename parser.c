@@ -15,14 +15,22 @@ typedef struct {
 
 typedef struct {
     StringView name;
-    Address address;
+    Address offset;
 } Label;
+
+typedef struct {
+    Token const* label_token;
+    size_t offset;
+} LabelPlaceholder;
 
 CREATE_VECTOR_DECLARATION(LabelVector, Label, label_vector)
 CREATE_VECTOR_DEFINITION(LabelVector, Label, label_vector)
 
 CREATE_VECTOR_DECLARATION(ArgumentVector, Argument, argument_vector)
 CREATE_VECTOR_DEFINITION(ArgumentVector, Argument, argument_vector)
+
+CREATE_VECTOR_DECLARATION(LabelPlaceholderVector, LabelPlaceholder, label_placeholder_vector)
+CREATE_VECTOR_DEFINITION(LabelPlaceholderVector, LabelPlaceholder, label_placeholder_vector)
 
 typedef struct {
     TokenVector tokens;
@@ -31,6 +39,7 @@ typedef struct {
     ByteVector machine_code;
     LabelVector labels;
     SourceFile source_file;
+    LabelPlaceholderVector label_placeholders;
 } ParserState;
 
 typedef struct {
@@ -97,6 +106,14 @@ static void emit_u32(uint32_t value) {
 static void emit_u64(uint64_t value) {
     assert(state.machine_code.size % 4 == 0 && "invalid alignment");
     if (state.machine_code.size % 8 != 0) {
+        // if there are any labels referencing this code segment => adjust them
+        // so that they also have the right alignment
+        for (size_t i = 0; i < state.labels.size; ++i) {
+            if (state.labels.data[i].offset == state.machine_code.size) {
+                state.labels.data[i].offset += 4;
+            }
+        }
+
         // fix alignment by inserting padding
         emit_u32(0xDEADC0DE);
     }
@@ -112,6 +129,14 @@ static void emit_u64(uint64_t value) {
     byte_vector_push(&state.machine_code, bytes.bytes[7]);
 }
 
+static void overwrite_u32(size_t const offset, uint32_t const value) {
+    U32Bytes bytes = u32_to_big_endian(value);
+    state.machine_code.data[offset + 0] = bytes.bytes[0];
+    state.machine_code.data[offset + 1] = bytes.bytes[1];
+    state.machine_code.data[offset + 2] = bytes.bytes[2];
+    state.machine_code.data[offset + 3] = bytes.bytes[3];
+}
+
 static bool register_label(StringView label_name) {
     for (size_t i = 0; i < state.labels.size; ++i) {
         if (string_view_compare(label_name, state.labels.data[i].name) == 0) {
@@ -120,7 +145,7 @@ static bool register_label(StringView label_name) {
     }
     label_vector_push(&state.labels, (Label){
         .name = label_name,
-        .address = (Address)(state.machine_code.size + ENTRY_POINT),
+        .offset = (Address)state.machine_code.size,
     });
     return true;
 }
@@ -147,18 +172,18 @@ static void init_state(SourceFile const source_file, TokenVector const tokens, O
         .machine_code = byte_vector_create(),
         .labels = label_vector_create(),
         .source_file = source_file,
+        .label_placeholders = label_placeholder_vector_create(),
     };
 }
 
 static ByteVector cleanup_state(void) {
     label_vector_free(&state.labels);
+    label_placeholder_vector_free(&state.label_placeholders);
     return state.machine_code;
 }
 
 static bool do_arguments_match(ArgumentType const lhs, ArgumentType const rhs) {
-    return lhs == rhs
-        || (lhs == ARGUMENT_TYPE_ADDRESS && rhs == ARGUMENT_TYPE_LABEL)
-        || (lhs == ARGUMENT_TYPE_LABEL && rhs == ARGUMENT_TYPE_ADDRESS);
+    return lhs == rhs;
 }
 
 static bool do_argument_lists_match(
@@ -204,6 +229,7 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
             arguments.data[i].first_token->string_view.data
         );
     }
+
     OpcodeSpecification const * const opcode_specification = find_opcode(mnemonic, arguments);
     if (opcode_specification == NULL) {
         error_on_token("unknown instruction or invalid arguments", mnemonic);
@@ -226,26 +252,67 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
     for (size_t i = 0; i < arguments.size; ++i) {
         size_t index = arguments.size - i - 1;
         switch (arguments.data[index].type) {
-            case ARGUMENT_TYPE_ADDRESS:
+            case ARGUMENT_TYPE_ADDRESS_POINTER:
                 assert(arguments.data[index].first_token->type == TOKEN_TYPE_ASTERISK);
-                word_from_token(arguments.data[index].first_token + 1, &success, &word_result);
-                fprintf(stderr, "%.*s\n", (int)(arguments.data[index].first_token + 1)->string_view.length,
-                (arguments.data[index].first_token + 1)->string_view.data);
-                assert(success);
-                instruction |= word_result;
+                /* The argument can either be an address (e.g. *0x10) or a label
+                 * (e.g. *main). In the latter case we do not do anything since the address
+                 * will be inserted later. Otherwise, we parse the number and use it as an
+                 * address. */
+                assert(
+                    (arguments.data[index].first_token + 1)->type == TOKEN_TYPE_IDENTIFIER
+                    || (arguments.data[index].first_token + 1)->type == TOKEN_TYPE_WORD_LITERAL
+                );
+                if ((arguments.data[index].first_token + 1)->type == TOKEN_TYPE_IDENTIFIER) {
+                    size_t const offset = state.machine_code.size
+                        + (state.machine_code.size % 8 == 0 ? 4 : 8);
+                    label_placeholder_vector_push(
+                        &state.label_placeholders,
+                        (LabelPlaceholder){
+                            .label_token = arguments.data[index].first_token + 1,
+                            .offset = offset,
+                        }
+                    );
+                    instruction |= 0xDEADC0DE; // placeholder
+                } else {
+                    word_from_token(arguments.data[index].first_token + 1, &success, &word_result);
+                    fprintf(
+                        stderr,
+                        "%.*s\n",
+                        (int)(arguments.data[index].first_token + 1)->string_view.length,
+                        (arguments.data[index].first_token + 1)->string_view.data
+                    );
+                    assert(success);
+                    instruction |= word_result;
+                }
                 break;
             case ARGUMENT_TYPE_IMMEDIATE:
-                word_from_token(arguments.data[index].first_token, &success, &word_result);
-                assert(success); // should've been checked before
-                instruction |= word_result;
-                break;
-            case ARGUMENT_TYPE_LABEL:
-                assert(false && "not implemented");
+                assert(
+                    arguments.data[index].first_token->type == TOKEN_TYPE_IDENTIFIER
+                    || arguments.data[index].first_token->type == TOKEN_TYPE_WORD_LITERAL
+                );
+                if (arguments.data[index].first_token->type == TOKEN_TYPE_IDENTIFIER) {
+                    // label
+                    size_t const offset = state.machine_code.size
+                        + (state.machine_code.size % 8 == 0 ? 4 : 8);
+                    label_placeholder_vector_push(
+                        &state.label_placeholders,
+                        (LabelPlaceholder){
+                            .label_token = arguments.data[index].first_token,
+                            .offset = offset,
+                        }
+                    );
+                    instruction |= 0xDEADC0DE; // placeholder
+                } else {
+                    // immediate
+                    word_from_token(arguments.data[index].first_token, &success, &word_result);
+                    assert(success); // should've been checked before
+                    instruction |= word_result;
+                }
                 break;
             case ARGUMENT_TYPE_NONE:
                 assert(false && "unreachable");
                 break;
-            case ARGUMENT_TYPE_POINTER:
+            case ARGUMENT_TYPE_REGISTER_POINTER:
                 assert(arguments.data[index].first_token->type == TOKEN_TYPE_ASTERISK);
                 register_from_token(arguments.data[index].first_token + 1, &success, &register_result);
                 assert(success);
@@ -294,7 +361,7 @@ static void parse_instruction(void) {
             if (!valid_argument_start_position) {
                 error_on_current_token("comma expected");
             }
-            // pointer or address
+            // pointer or address or label pointer
             current_argument_start = current();
         } else if (current()->type == TOKEN_TYPE_EOF) {
             error(state.source_file, "unexpected end of file", current()->line, current()->column, 1);
@@ -305,10 +372,10 @@ static void parse_instruction(void) {
             break;
         } else {
             if (current_argument_start == NULL) {
+                // no pointer and no address
                 if (!valid_argument_start_position) {
                     error_on_current_token("comma expected");
                 }
-                // no pointer and no address
                 switch (current()->type) {
                     case TOKEN_TYPE_WORD_LITERAL:
                         argument_vector_push(&arguments, (Argument){
@@ -326,7 +393,7 @@ static void parse_instruction(void) {
                         break;
                     case TOKEN_TYPE_IDENTIFIER:
                         argument_vector_push(&arguments, (Argument){
-                            .type = ARGUMENT_TYPE_LABEL,
+                            .type = ARGUMENT_TYPE_IMMEDIATE,
                             .first_token = current(),
                         });
                         valid_argument_start_position = false;
@@ -335,18 +402,25 @@ static void parse_instruction(void) {
                         error_on_current_token("invalid argument");
                 }
             } else {
-                // second token of pointer or address
+                // second token of pointer or address or label pointer
                 switch (current()->type) {
                     case TOKEN_TYPE_WORD_LITERAL:
                         argument_vector_push(&arguments, (Argument){
-                            .type = ARGUMENT_TYPE_ADDRESS,
+                            .type = ARGUMENT_TYPE_ADDRESS_POINTER,
                             .first_token = current_argument_start,
                         });
                         valid_argument_start_position = false;
                         break;
                     case TOKEN_TYPE_REGISTER:
                         argument_vector_push(&arguments, (Argument){
-                            .type = ARGUMENT_TYPE_POINTER,
+                            .type = ARGUMENT_TYPE_REGISTER_POINTER,
+                            .first_token = current_argument_start,
+                        });
+                        valid_argument_start_position = false;
+                        break;
+                    case TOKEN_TYPE_IDENTIFIER:
+                        argument_vector_push(&arguments, (Argument){
+                            .type = ARGUMENT_TYPE_ADDRESS_POINTER,
                             .first_token = current_argument_start,
                         });
                         valid_argument_start_position = false;
@@ -411,8 +485,11 @@ static void parse_words_literal(void) {
 }
 
 static void emit_quoted_escaped_string(StringView string) {
+    size_t const length_byte_offset = state.machine_code.size;
+    emit_u32(0); // length byte, will be replaced later
     char const* current = string.data + 1;
     char const * const end = string.data + string.length - 1;
+    Word length = 0;
     while (current != end) {
         switch (*current) {
             case '\\':
@@ -449,8 +526,10 @@ static void emit_quoted_escaped_string(StringView string) {
                 emit_u32((Word)*current);
                 break;
         }
+        ++length;
         ++current;
     }
+    overwrite_u32(length_byte_offset, length);
 }
 
 static void parse_string_literal(void) {
@@ -507,5 +586,38 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
         }
         next();
     }
+    for (size_t i = 0; i < state.labels.size; ++i) {
+        fprintf(
+            stderr,
+            "%.*s @ 0x%08"PRIX32"\n",
+            (int)state.labels.data[i].name.length,
+            state.labels.data[i].name.data,
+            state.labels.data[i].offset
+        );
+    }
+
+    for (size_t i = 0; i < state.label_placeholders.size; ++i) {
+        LabelPlaceholder const * const placeholder = &state.label_placeholders.data[i];
+        bool found_label = false;
+        for (size_t j = 0; j < state.labels.size; ++j) {
+            Label const * const label = &state.labels.data[j];
+            if (string_view_compare(label->name, placeholder->label_token->string_view) == 0) {
+                found_label = true;
+                assert(state.machine_code.size > placeholder->offset && "invalid offset");
+                fprintf(
+                    stderr,
+                    "Replacing value at %zu with %"PRIx32"\n",
+                    placeholder->offset,
+                    label->offset + ENTRY_POINT
+                );
+                overwrite_u32(placeholder->offset, label->offset + ENTRY_POINT);
+                break;
+            }
+        }
+        if (!found_label) {
+            error_on_token("unknown label", placeholder->label_token);
+        }
+    }
+
     return cleanup_state();
 }

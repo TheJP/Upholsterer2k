@@ -1,21 +1,30 @@
-// this is a comment
-
 jump main
 
-//error_string:
-    //.string "Some error\n- or let's call it \"happy little accident\" -\noccured"
-//one_big_number:
-    //.words[1,2,3,4]
+text:
+    .string "CodingPurpurTentakel macht einfach richtig geile Streams! Folgt ihm unter                 https://twitch.tv/CodingPurpurTentakel"
 
 main:
-   copy 42, R0 // copy 42 into register 0
-   copy R0, R15 // copy the value of register 0 into register 15
-   copy R15, *0x00AB0000 // copy the value of register 15 into memory at location 0x00AB0000
-   copy *0x00AB0000, R16 // copy the value at memory location 0x00AB0000 into register 16
+    copy *text, R0 // text length
+    copy 2, R10 // constant 2
+    lshift R10, R0, R0 // text length in bytes
 
-   copy 0xAB0004, R20 // copy the value 0xAB0004 into register 20
-   copy R0, *R20 // copy the value of register 0 into memory at the location stored in register 20
+    copy text, R1 // begin pointer
+    add 4, R1, R1
 
-   add 4, R16, R17
+    copy R1, R2 // end pointer
+    add R0, R1, R2
 
-   jump main
+    copy 0, R3 // write position
+
+    loop:
+        copy *R1, R4 // R4 = temporary register
+        copy R4, *R3 // write character to terminal
+
+        add 4, R3, R3 // increase write position
+        add 4, R1, R1 // advance begin pointer
+
+        comp R1, R2, R4
+
+        jump_not_zero loop
+
+    halt
