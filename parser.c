@@ -86,6 +86,7 @@ static U64Bytes u64_to_big_endian(uint64_t value) {
 }
 
 static void emit_u32(uint32_t value) {
+    assert(state.machine_code.size % 4 == 0 && "invalid alignment");
     U32Bytes const bytes = u32_to_big_endian(value);
     byte_vector_push(&state.machine_code, bytes.bytes[0]);
     byte_vector_push(&state.machine_code, bytes.bytes[1]);
@@ -94,6 +95,12 @@ static void emit_u32(uint32_t value) {
 }
 
 static void emit_u64(uint64_t value) {
+    assert(state.machine_code.size % 4 == 0 && "invalid alignment");
+    if (state.machine_code.size % 8 != 0) {
+        // fix alignment by inserting padding
+        emit_u32(0xDEADC0DE);
+    }
+    assert(state.machine_code.size % 8 == 0 && "invalid alignment");
     U64Bytes const bytes = u64_to_big_endian(value);
     byte_vector_push(&state.machine_code, bytes.bytes[0]);
     byte_vector_push(&state.machine_code, bytes.bytes[1]);
