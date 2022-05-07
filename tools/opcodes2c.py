@@ -38,6 +38,7 @@ def main():
         with open(input_filename, 'r') as in_file:
             data = json.load(in_file)
         try:
+            data["opcodes"] = dict(sorted(data["opcodes"].items(), key=lambda entry: entry[1]["opcode"]))
             num_opcodes = len(data["opcodes"])
             with open(output_filename, 'w') as out_file:
                 out_file.write("""// auto-generated with opcodes2c.py
