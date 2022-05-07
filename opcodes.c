@@ -11,7 +11,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MoveRegisterImmediate")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_IMMEDIATE, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 0, 40 },
         .opcode = 0x0,
     };
@@ -20,7 +19,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MoveRegisterAddress")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_ADDRESS_POINTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 0, 40 },
         .opcode = 0x1,
     };
@@ -29,7 +27,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MoveTargetSource")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 40 },
         .opcode = 0x2,
     };
@@ -38,7 +35,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MoveAddressRegister")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_ADDRESS_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 0 },
         .opcode = 0x3,
     };
@@ -47,7 +43,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MoveTargetPointer")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 40 },
         .opcode = 0x4,
     };
@@ -56,7 +51,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MovePointerSource")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 40 },
         .opcode = 0x5,
     };
@@ -65,7 +59,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("HaltAndCatchFire")),
         .argument_count = 0,
         .required_arguments = { ARGUMENT_TYPE_NONE },
-        .argument_usages = { ARGUMENT_USAGE_NONE },
         .offsets = { 0 },
         .opcode = 0x6,
     };
@@ -74,7 +67,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AddTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0x7,
     };
@@ -83,7 +75,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("SubtractTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0x8,
     };
@@ -92,7 +83,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("SubtractWithCarryTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0x9,
     };
@@ -101,7 +91,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("MultiplyHighLowLhsRhs")),
         .argument_count = 4,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET, ARGUMENT_USAGE_TARGET },
         .offsets = { 24, 16, 40, 32 },
         .opcode = 0xa,
     };
@@ -110,7 +99,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DivmodTargetModLhsRhs")),
         .argument_count = 4,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET, ARGUMENT_USAGE_TARGET },
         .offsets = { 24, 16, 40, 32 },
         .opcode = 0xb,
     };
@@ -119,7 +107,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AndTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0xc,
     };
@@ -128,7 +115,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("OrTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0xd,
     };
@@ -137,7 +123,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("XorTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0xe,
     };
@@ -146,7 +131,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("NotTargetSource")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 40 },
         .opcode = 0xf,
     };
@@ -155,7 +139,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("LeftShiftTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0x10,
     };
@@ -164,7 +147,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("RightShiftTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0x11,
     };
@@ -173,7 +155,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AddTargetSourceImmediate")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_IMMEDIATE, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 0, 40 },
         .opcode = 0x12,
     };
@@ -182,7 +163,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("SubtractTargetSourceImmediate")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_IMMEDIATE, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 0, 40 },
         .opcode = 0x13,
     };
@@ -191,7 +171,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("CompareTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0x14,
     };
@@ -200,7 +179,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("PushRegister")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x15,
     };
@@ -209,7 +187,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("PopRegister")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_TARGET },
         .offsets = { 40 },
         .opcode = 0x16,
     };
@@ -218,7 +195,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("CallAddress")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_ADDRESS_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 0 },
         .opcode = 0x17,
     };
@@ -227,7 +203,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("Return")),
         .argument_count = 0,
         .required_arguments = { ARGUMENT_TYPE_NONE },
-        .argument_usages = { ARGUMENT_USAGE_NONE },
         .offsets = { 0 },
         .opcode = 0x18,
     };
@@ -236,7 +211,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediate")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 0 },
         .opcode = 0x19,
     };
@@ -245,7 +219,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegister")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x1a,
     };
@@ -254,7 +227,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfEqual")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 0 },
         .opcode = 0x1b,
     };
@@ -263,7 +235,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfGreaterThan")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 0 },
         .opcode = 0x1c,
     };
@@ -272,7 +243,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfLessThan")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 0 },
         .opcode = 0x1d,
     };
@@ -281,7 +251,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfGreaterThanOrEqual")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 0 },
         .opcode = 0x1e,
     };
@@ -290,7 +259,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfLessThanOrEqual")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 0 },
         .opcode = 0x1f,
     };
@@ -299,7 +267,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfZero")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 0 },
         .opcode = 0x20,
     };
@@ -308,7 +275,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfNotZero")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 0 },
         .opcode = 0x21,
     };
@@ -317,7 +283,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfCarry")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 0 },
         .opcode = 0x22,
     };
@@ -326,7 +291,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfNotCarry")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 0 },
         .opcode = 0x23,
     };
@@ -335,7 +299,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfDivideByZero")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 0 },
         .opcode = 0x24,
     };
@@ -344,7 +307,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpImmediateIfNotDivideByZero")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_IMMEDIATE },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 0 },
         .opcode = 0x25,
     };
@@ -353,7 +315,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfEqual")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 32 },
         .opcode = 0x26,
     };
@@ -362,7 +323,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfGreaterThan")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 32 },
         .opcode = 0x27,
     };
@@ -371,7 +331,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfLessThan")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 32 },
         .opcode = 0x28,
     };
@@ -380,7 +339,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfGreaterThanOrEqual")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 32 },
         .opcode = 0x29,
     };
@@ -389,7 +347,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfLessThanOrEqual")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE },
         .offsets = { 40, 32 },
         .opcode = 0x2a,
     };
@@ -398,7 +355,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfZero")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x2b,
     };
@@ -407,7 +363,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfNotZero")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x2c,
     };
@@ -416,7 +371,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfCarry")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x2d,
     };
@@ -425,7 +379,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfNotCarry")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x2e,
     };
@@ -434,7 +387,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfDivideByZero")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x2f,
     };
@@ -443,7 +395,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("JumpRegisterIfNotDivideByZero")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x30,
     };
@@ -452,7 +403,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("NoOp")),
         .argument_count = 0,
         .required_arguments = { ARGUMENT_TYPE_NONE },
-        .argument_usages = { ARGUMENT_USAGE_NONE },
         .offsets = { 0 },
         .opcode = 0x31,
     };
@@ -461,7 +411,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("GetKeyState")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 40 },
         .opcode = 0x32,
     };
@@ -470,7 +419,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("PollTime")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_TARGET, ARGUMENT_USAGE_TARGET },
         .offsets = { 40, 32 },
         .opcode = 0x33,
     };
@@ -479,7 +427,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AddWithCarryTargetLhsRhs")),
         .argument_count = 3,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_SOURCE, ARGUMENT_USAGE_TARGET },
         .offsets = { 32, 24, 40 },
         .opcode = 0x34,
     };
@@ -488,7 +435,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("SwapFramebuffers")),
         .argument_count = 0,
         .required_arguments = { ARGUMENT_TYPE_NONE },
-        .argument_usages = { ARGUMENT_USAGE_NONE },
         .offsets = { 0 },
         .opcode = 0x35,
     };
@@ -497,7 +443,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("CallRegister")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x36,
     };
@@ -506,7 +451,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("CallPointer")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER_POINTER },
-        .argument_usages = { ARGUMENT_USAGE_SOURCE },
         .offsets = { 40 },
         .opcode = 0x37,
     };
@@ -515,7 +459,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("InvisibleFramebufferAddress")),
         .argument_count = 1,
         .required_arguments = { ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_TARGET },
         .offsets = { 40 },
         .opcode = 0x38,
     };
@@ -524,7 +467,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("PollCycleCountHighLow")),
         .argument_count = 2,
         .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
-        .argument_usages = { ARGUMENT_USAGE_TARGET, ARGUMENT_USAGE_TARGET },
         .offsets = { 40, 32 },
         .opcode = 0x39,
     };
@@ -533,7 +475,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DumpMemory")),
         .argument_count = 0,
         .required_arguments = { ARGUMENT_TYPE_NONE },
-        .argument_usages = { ARGUMENT_USAGE_NONE },
         .offsets = { 0 },
         .opcode = 0xfffe,
     };
@@ -542,7 +483,6 @@ OpcodeList opcode_specifications(void) {
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DumpRegisters")),
         .argument_count = 0,
         .required_arguments = { ARGUMENT_TYPE_NONE },
-        .argument_usages = { ARGUMENT_USAGE_NONE },
         .offsets = { 0 },
         .opcode = 0xffff,
     };

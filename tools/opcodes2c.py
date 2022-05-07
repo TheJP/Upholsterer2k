@@ -64,12 +64,9 @@ OpcodeList opcode_specifications(void) {\n""")
                     out_file.write(f"        .required_arguments = {{ ")
                     out_file.write("ARGUMENT_TYPE_NONE" if len(arguments) == 0 else ', '.join(x.arg_type for x in arguments))
                     out_file.write(f" }},\n")
-                    out_file.write(f"        .argument_usages = {{ ")
-                    out_file.write("ARGUMENT_USAGE_NONE" if len(arguments) == 0 else ', '.join(x.usage for x in arguments))
-                    out_file.write(f" }},\n");
                     out_file.write(f"        .offsets = {{ ")
                     out_file.write("0" if len(arguments) == 0 else ', '.join(str(x.offset) for x in arguments))
-                    out_file.write(f" }},\n");
+                    out_file.write(f" }},\n")
                     opcode = data["opcodes"][opcode]["opcode"]
                     out_file.write(f"        .opcode = {hex(opcode)},\n")
                     out_file.write(f"    }};\n")
