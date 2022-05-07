@@ -6,10 +6,10 @@ text:
 main:
     copy *text, R0 // text length
     copy 2, R10 // constant 2
-    lshift R10, R0, R0 // text length in bytes
+    lshift R0, R10, R0 // text length in bytes
 
     copy text, R1 // begin pointer
-    add 4, R1, R1
+    add R1, 4, R1
 
     copy R1, R2 // end pointer
     add R0, R1, R2
@@ -20,8 +20,8 @@ main:
         copy *R1, R4 // R4 = temporary register
         copy R4, *R3 // write character to terminal
 
-        add 4, R3, R3 // increase write position
-        add 4, R1, R1 // advance begin pointer
+        add R3, 4, R3 // increase write position
+        add R1, 4, R1 // advance begin pointer
 
         comp R1, R2, R4
 
