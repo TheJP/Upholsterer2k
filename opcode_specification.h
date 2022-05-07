@@ -14,6 +14,12 @@ typedef enum {
     // TODO: Difference?
 } ArgumentType;
 
+typedef enum {
+    ARGUMENT_USAGE_SOURCE,
+    ARGUMENT_USAGE_TARGET,
+    ARGUMENT_USAGE_NONE,
+} ArgumentUsage;
+
 typedef uint16_t Opcode;
 
 typedef struct {
@@ -21,6 +27,8 @@ typedef struct {
     StringView mnemonic; // e.g. "COPY"
     size_t argument_count; // e.g. 2
     ArgumentType required_arguments[6]; // e.g. { Immediate, Register }
+    ArgumentUsage argument_usages[6]; // either ARGUMENT_USAGE_SOURCE or ARGUMENT_USAGE_TARGET
+    uint8_t offsets[6]; // amount to shift the argument to the right (in bits)
     Opcode opcode; // e.g. 0x0000
 } OpcodeSpecification;
 

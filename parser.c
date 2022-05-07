@@ -191,8 +191,8 @@ static bool do_argument_lists_match(
     OpcodeSpecification const * const opcode
 ) {
     assert(arguments.size == opcode->argument_count);
-    for (size_t i = 0; i < arguments.size; ++i) {
-        if (!do_arguments_match(arguments.data[i].type, opcode->required_arguments[arguments.size - i - 1])) {
+    for (size_t i = 0; i < opcode->argument_count; ++i) {
+        if (!do_arguments_match(arguments.data[i].type, opcode->required_arguments[i])) {
             return false;
         }
     }
@@ -248,38 +248,37 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
     bool success;
     Word word_result;
     Register register_result;
-    size_t shift_offset = 40;
+
     for (size_t i = 0; i < arguments.size; ++i) {
-        size_t index = arguments.size - i - 1;
-        switch (arguments.data[index].type) {
+        switch (arguments.data[i].type) {
             case ARGUMENT_TYPE_ADDRESS_POINTER:
-                assert(arguments.data[index].first_token->type == TOKEN_TYPE_ASTERISK);
+                assert(arguments.data[i].first_token->type == TOKEN_TYPE_ASTERISK);
                 /* The argument can either be an address (e.g. *0x10) or a label
                  * (e.g. *main). In the latter case we do not do anything since the address
                  * will be inserted later. Otherwise, we parse the number and use it as an
                  * address. */
                 assert(
-                    (arguments.data[index].first_token + 1)->type == TOKEN_TYPE_IDENTIFIER
-                    || (arguments.data[index].first_token + 1)->type == TOKEN_TYPE_WORD_LITERAL
+                    (arguments.data[i].first_token + 1)->type == TOKEN_TYPE_IDENTIFIER
+                    || (arguments.data[i].first_token + 1)->type == TOKEN_TYPE_WORD_LITERAL
                 );
-                if ((arguments.data[index].first_token + 1)->type == TOKEN_TYPE_IDENTIFIER) {
+                if ((arguments.data[i].first_token + 1)->type == TOKEN_TYPE_IDENTIFIER) {
                     size_t const offset = state.machine_code.size
                         + (state.machine_code.size % 8 == 0 ? 4 : 8);
                     label_placeholder_vector_push(
                         &state.label_placeholders,
                         (LabelPlaceholder){
-                            .label_token = arguments.data[index].first_token + 1,
+                            .label_token = arguments.data[i].first_token + 1,
                             .offset = offset,
                         }
                     );
                     instruction |= 0xDEADC0DE; // placeholder
                 } else {
-                    word_from_token(arguments.data[index].first_token + 1, &success, &word_result);
+                    word_from_token(arguments.data[i].first_token + 1, &success, &word_result);
                     fprintf(
                         stderr,
                         "%.*s\n",
-                        (int)(arguments.data[index].first_token + 1)->string_view.length,
-                        (arguments.data[index].first_token + 1)->string_view.data
+                        (int)(arguments.data[i].first_token + 1)->string_view.length,
+                        (arguments.data[i].first_token + 1)->string_view.data
                     );
                     assert(success);
                     instruction |= word_result;
@@ -287,24 +286,24 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                 break;
             case ARGUMENT_TYPE_IMMEDIATE:
                 assert(
-                    arguments.data[index].first_token->type == TOKEN_TYPE_IDENTIFIER
-                    || arguments.data[index].first_token->type == TOKEN_TYPE_WORD_LITERAL
+                    arguments.data[i].first_token->type == TOKEN_TYPE_IDENTIFIER
+                    || arguments.data[i].first_token->type == TOKEN_TYPE_WORD_LITERAL
                 );
-                if (arguments.data[index].first_token->type == TOKEN_TYPE_IDENTIFIER) {
+                if (arguments.data[i].first_token->type == TOKEN_TYPE_IDENTIFIER) {
                     // label
                     size_t const offset = state.machine_code.size
                         + (state.machine_code.size % 8 == 0 ? 4 : 8);
                     label_placeholder_vector_push(
                         &state.label_placeholders,
                         (LabelPlaceholder){
-                            .label_token = arguments.data[index].first_token,
+                            .label_token = arguments.data[i].first_token,
                             .offset = offset,
                         }
                     );
                     instruction |= 0xDEADC0DE; // placeholder
                 } else {
                     // immediate
-                    word_from_token(arguments.data[index].first_token, &success, &word_result);
+                    word_from_token(arguments.data[i].first_token, &success, &word_result);
                     assert(success); // should've been checked before
                     instruction |= word_result;
                 }
@@ -313,17 +312,15 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                 assert(false && "unreachable");
                 break;
             case ARGUMENT_TYPE_REGISTER_POINTER:
-                assert(arguments.data[index].first_token->type == TOKEN_TYPE_ASTERISK);
-                register_from_token(arguments.data[index].first_token + 1, &success, &register_result);
+                assert(arguments.data[i].first_token->type == TOKEN_TYPE_ASTERISK);
+                register_from_token(arguments.data[i].first_token + 1, &success, &register_result);
                 assert(success);
-                instruction |= ((Instruction)register_result) << shift_offset;
-                shift_offset -= 8;
+                instruction |= ((Instruction)register_result) << opcode_specification->offsets[i];
                 break;
             case ARGUMENT_TYPE_REGISTER:
-                register_from_token(arguments.data[index].first_token, &success, &register_result);
+                register_from_token(arguments.data[i].first_token, &success, &register_result);
                 assert(success);
-                instruction |= ((Instruction)register_result) << shift_offset;
-                shift_offset -= 8;
+                instruction |= ((Instruction)register_result) << opcode_specification->offsets[i];
                 break;
         }
     }
