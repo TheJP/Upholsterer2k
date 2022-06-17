@@ -280,7 +280,9 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                         (int)(arguments.data[i].first_token + 1)->string_view.length,
                         (arguments.data[i].first_token + 1)->string_view.data
                     );
-                    assert(success);
+                    if (!success) {
+                        error_on_token("invalid pointer value", arguments.data[i].first_token + 1);
+                    }
                     instruction |= word_result;
                 }
                 break;
@@ -304,7 +306,9 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                 } else {
                     // immediate
                     word_from_token(arguments.data[i].first_token, &success, &word_result);
-                    assert(success); // should've been checked before
+                    if (!success) {
+                        error_on_token("invalid immediate value", arguments.data[i].first_token);
+                    }
                     instruction |= word_result;
                 }
                 break;
@@ -314,12 +318,16 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
             case ARGUMENT_TYPE_REGISTER_POINTER:
                 assert(arguments.data[i].first_token->type == TOKEN_TYPE_ASTERISK);
                 register_from_token(arguments.data[i].first_token + 1, &success, &register_result);
-                assert(success);
+                if (!success) {
+                    error_on_token("invalid register identifier", arguments.data[i].first_token + 1);
+                }
                 instruction |= ((Instruction)register_result) << opcode_specification->offsets[i];
                 break;
             case ARGUMENT_TYPE_REGISTER:
                 register_from_token(arguments.data[i].first_token, &success, &register_result);
-                assert(success);
+                if (!success) {
+                    error_on_token("invalid register identifier", arguments.data[i].first_token);
+                }
                 instruction |= ((Instruction)register_result) << opcode_specification->offsets[i];
                 break;
         }
