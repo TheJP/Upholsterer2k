@@ -9,7 +9,6 @@ void error(
     size_t const column,
     size_t squiggly_length
 ) {
-    assert(squiggly_length >= 1);
     fprintf(
         stderr, "%.*s:%zu:%zu: %s\n",
         (int)source_file.filename.length,
