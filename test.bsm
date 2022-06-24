@@ -27,4 +27,4 @@ main:
 
         jump_not_zero loop
 
-    halt
+    halt // STOPP, JETZT REDE ICH! ES IST SEHR WOHL OBST IM HAUS!
