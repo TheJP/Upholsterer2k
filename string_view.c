@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "string_view.h"
 
 StringView string_view_from_pointers(char* const start_inclusive, char* const end_exclusive) {
