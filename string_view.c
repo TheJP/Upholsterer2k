@@ -37,8 +37,8 @@ int string_view_compare(StringView const lhs, StringView const rhs) {
 
 int case_insensitive_strncmp(char const * const lhs, char const * const rhs, size_t const n) {
     for (size_t i = 0; i < n; ++i) {
-        char const left = toupper(lhs[i]);
-        char const right = toupper(rhs[i]);
+        char const left = (char)toupper(lhs[i]);
+        char const right = (char)toupper(rhs[i]);
         int const comparison_result = strncmp(&left, &right, 1);
         if (comparison_result != 0) {
             return comparison_result;
