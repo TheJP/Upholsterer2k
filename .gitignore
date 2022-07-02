@@ -3,3 +3,4 @@ bin/*
 .vscode/*
 tools/opcodes.json
 *.backseat
+.idea/*
