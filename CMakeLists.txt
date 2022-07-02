@@ -13,10 +13,9 @@ set(CMAKE_C_EXTENSIONS OFF)
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib )
 
-set (TARGET_NAME Main)
+set(TARGET_NAME Upholsterer2k)
 
-add_executable (
-    ${TARGET_NAME}
+set(FILES
     "main.c"
     "string_view_utils.c"
     "string_view_utils.h"
@@ -40,6 +39,11 @@ add_executable (
     "parser.h"
     "parser.c"
     "constants.h"
+)
+
+add_executable (
+    ${TARGET_NAME}
+    ${FILES}
 )
 
 # set binary filenames
