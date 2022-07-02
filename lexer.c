@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "lexer.h"
 #include "error.h"
+#include "constants.h"
 
 typedef enum {
     DECIMAL,
@@ -61,9 +62,9 @@ TokenVector tokenize(SourceFile const source_file) {
     if (source_file.source.length == 0) {
         return tokens;
     }
-    char* current = source_file.source.data;
-    char* const end = source_file.source.data + source_file.source.length;
-    char* current_line_start = current;
+    char const* current = source_file.source.data;
+    char const* const end = source_file.source.data + source_file.source.length;
+    char const* current_line_start = current;
     size_t line = 1;
     while (current != end) {
         switch (*current) {
@@ -175,7 +176,7 @@ TokenVector tokenize(SourceFile const source_file) {
                 break;
             case '"': {
                 // string literals
-                char* const literal_start = current;
+                char const * const literal_start = current;
                 ++current;
                 while (current != end && *current != '"' && is_valid_string_literal_char(*current)) {
                     if (*current == '\\') {
@@ -226,7 +227,7 @@ TokenVector tokenize(SourceFile const source_file) {
                     // do nothing
                 } else if ((*current == 'r' || *current == 'R') && current + 1 != end && isdigit(*(current + 1))) {
                     // register
-                    char* const register_start = current;
+                    char const * const register_start = current;
                     ++current;
                     while (current != end && isdigit(*current)) {
                         ++current;
@@ -252,7 +253,7 @@ TokenVector tokenize(SourceFile const source_file) {
                             .line = line,
                         });
                     } else {
-                        char* const literal_start = current;
+                        char const * const literal_start = current;
                         ++current;
                         WordLiteralType word_literal_type;
                         switch (*current) {
@@ -293,15 +294,28 @@ TokenVector tokenize(SourceFile const source_file) {
                         --current;
                     }
                 } else if (is_valid_identifier_start_char(*current)) {
-                    // identifier
-                    char* const identifier_start = current;
+                    // identifier or register constant or word constant
+                    char const * const identifier_start = current;
                     ++current;
                     while (current != end && is_valid_identifier_inner_char(*current)) {
                         ++current;
                     }
+                    StringView const identifier = string_view_from_pointers(identifier_start, current);
+                    bool constant_found;
+                    get_constant_value(identifier, CONSTANT_TYPE_REGISTER, &constant_found, NULL);
+                    TokenType token_type = TOKEN_TYPE_IDENTIFIER;
+                    if (constant_found) {
+                        token_type = TOKEN_TYPE_REGISTER_CONSTANT;
+                    }
+                    if (!constant_found) {
+                        get_constant_value(identifier, CONSTANT_TYPE_UNSIGNED_INTEGER, &constant_found, NULL);
+                        if (constant_found) {
+                            token_type = TOKEN_TYPE_WORD_CONSTANT;
+                        }
+                    }
                     token_vector_push(&tokens, (Token){
-                        .type = TOKEN_TYPE_IDENTIFIER,
-                        .string_view = string_view_from_pointers(identifier_start, current),
+                        .type = token_type,
+                        .string_view = identifier,
                         .line = line,
                         .column = (size_t)(identifier_start - current_line_start + 1),
                     });

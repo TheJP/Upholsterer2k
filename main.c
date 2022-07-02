@@ -9,7 +9,7 @@
 #include "opcodes.h"
 #include "parser.h"
 
-StringView read_whole_file(FILE* const file) {
+void read_whole_file(FILE* const file, char** contents, size_t* length) {
     size_t capacity = 0;
     size_t size = 0;
     char* buffer = NULL;
@@ -20,20 +20,17 @@ StringView read_whole_file(FILE* const file) {
             char* const new_buffer = realloc(buffer, capacity);
             if (new_buffer == NULL) {
                 free(buffer);
-                return (StringView){
-                    .data = NULL,
-                    .length = 0,
-                };
+                *contents = NULL;
+                *length = 0;
+                return;
             }
             buffer = new_buffer;
         }
         buffer[size] = (char)current_char;
         ++size;
     }
-    return (StringView){
-        .data = buffer,
-        .length = size,
-    };
+    *contents = buffer;
+    *length = size;
 }
 
 void write_machine_code(ByteVector machine_code, FILE* const file) {
@@ -48,17 +45,22 @@ void check_opcodes(OpcodeList const opcodes) {
 }
 
 int main(int argc, char** argv) {
+    char* source_data = NULL;
     StringView source = { 0 };
     if (argc == 1) {
-        source = read_whole_file(stdin);
+        size_t length;
+        read_whole_file(stdin, &source_data, &length);
+        source = (StringView){ .data = source_data, .length = length };
     } else if (argc == 2) {
         FILE* file = fopen(argv[1], "r");
         if (!file) {
             fprintf(stderr, "Could not open file %s: %s.\n", argv[1], strerror(errno));
             return EXIT_FAILURE;
         }
-        source = read_whole_file(file);
+        size_t length;
+        read_whole_file(file, &source_data, &length);
         fclose(file);
+        source = (StringView){ .data = source_data, .length = length };
     } else {
         fprintf(stderr, "Usage: %s [SOURCEFILE]\n", argv[0]);
         return EXIT_FAILURE;
@@ -80,7 +82,7 @@ int main(int argc, char** argv) {
     // cleanup
     byte_vector_free(&machine_code);
     token_vector_free(&tokens);
-    free(source.data);
+    free(source_data);
     free(opcodes.specifications);
     return EXIT_SUCCESS;
 }

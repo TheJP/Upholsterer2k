@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "string_view.h"
 
-StringView string_view_from_pointers(char* const start_inclusive, char* const end_exclusive) {
+StringView string_view_from_pointers(char const * const start_inclusive, char const * const end_exclusive) {
     assert(start_inclusive == NULL || end_exclusive >= start_inclusive);
     assert((start_inclusive == NULL && end_exclusive == NULL) || (start_inclusive != NULL && end_exclusive != NULL));
     return (StringView){
@@ -13,7 +13,7 @@ StringView string_view_from_pointers(char* const start_inclusive, char* const en
     };
 }
 
-StringView string_view_from_string(char* const string) {
+StringView string_view_from_string(char const * const string) {
     return (StringView){
         .data = string,
         .length = strlen(string),
@@ -60,4 +60,16 @@ int string_view_compare_case_insensitive(StringView const lhs, StringView const 
         return -1;
     }
     return 0;
+}
+
+void print_string_view(FILE* stream, StringView const string_view) {
+    fprintf(stream, "%.*s", (int)string_view.length, string_view.data);
+}
+
+void string_view_stderr(StringView const string_view) {
+    print_string_view(stderr, string_view);
+}
+
+void string_view_stdout(StringView const string_view) {
+    print_string_view(stdout, string_view);
 }

@@ -254,8 +254,9 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
             case ARGUMENT_TYPE_ADDRESS_POINTER:
                 assert(arguments.data[i].first_token->type == TOKEN_TYPE_ASTERISK);
                 /* The argument can either be an address (e.g. *0x10) or a label
-                 * (e.g. *main). In the latter case we do not do anything since the address
-                 * will be inserted later. Otherwise, we parse the number and use it as an
+                 * (e.g. *main) or a constant (e.g. *TERMINAL_START). In the second
+                 * and third case we do not do anything since the address will be
+                 * inserted later. Otherwise, we parse the number and use it as an
                  * address. */
                 assert(
                     (arguments.data[i].first_token + 1)->type == TOKEN_TYPE_IDENTIFIER
@@ -286,12 +287,14 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                     instruction |= word_result;
                 }
                 break;
-            case ARGUMENT_TYPE_IMMEDIATE:
+            case ARGUMENT_TYPE_IMMEDIATE: {
+                TokenType const token_type = arguments.data[i].first_token->type;
                 assert(
-                    arguments.data[i].first_token->type == TOKEN_TYPE_IDENTIFIER
-                    || arguments.data[i].first_token->type == TOKEN_TYPE_WORD_LITERAL
+                    token_type == TOKEN_TYPE_IDENTIFIER
+                    || token_type == TOKEN_TYPE_WORD_LITERAL
+                    || token_type == TOKEN_TYPE_WORD_CONSTANT
                 );
-                if (arguments.data[i].first_token->type == TOKEN_TYPE_IDENTIFIER) {
+                if (token_type == TOKEN_TYPE_IDENTIFIER) {
                     // label
                     size_t const offset = state.machine_code.size
                         + (state.machine_code.size % 8 == 0 ? 4 : 8);
@@ -303,33 +306,84 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                         }
                     );
                     instruction |= 0xDEADC0DE; // placeholder
-                } else {
+                } else if (token_type == TOKEN_TYPE_WORD_LITERAL) {
                     // immediate
                     word_from_token(arguments.data[i].first_token, &success, &word_result);
                     if (!success) {
                         error_on_token("invalid immediate value", arguments.data[i].first_token);
                     }
                     instruction |= word_result;
+                } else if (token_type == TOKEN_TYPE_WORD_CONSTANT) {
+                    bool constant_found;
+                    uint64_t constant_value;
+                    get_constant_value(
+                        arguments.data[i].first_token->string_view,
+                        CONSTANT_TYPE_UNSIGNED_INTEGER,
+                        &constant_found, &constant_value);
+                    assert(constant_found && "look-up happened before and therefore now should be found");
+                    fprintf(stderr, "\treplaced numeric constant with value %"PRIu64"\n", constant_value);
+                    instruction |= (Instruction)constant_value;
+                } else {
+                    assert(false && "unreachable");
                 }
                 break;
+            }
             case ARGUMENT_TYPE_NONE:
                 assert(false && "unreachable");
                 break;
-            case ARGUMENT_TYPE_REGISTER_POINTER:
+            case ARGUMENT_TYPE_REGISTER_POINTER: {
+                /* the argument can now either be a register point (e.g. "*R6") or a register constant
+                 * pointer (e.g. "*sp" for dereferencing the stack pointer) */
                 assert(arguments.data[i].first_token->type == TOKEN_TYPE_ASTERISK);
-                register_from_token(arguments.data[i].first_token + 1, &success, &register_result);
-                if (!success) {
-                    error_on_token("invalid register identifier", arguments.data[i].first_token + 1);
+                TokenType const token_type = (arguments.data[i].first_token + 1)->type;
+                if (token_type == TOKEN_TYPE_REGISTER) {
+                    register_from_token(arguments.data[i].first_token + 1, &success, &register_result);
+                    if (!success) {
+                        error_on_token("invalid register identifier", arguments.data[i].first_token + 1);
+                    }
+                    instruction |= ((Instruction)register_result) << opcode_specification->offsets[i];
+                } else if (token_type == TOKEN_TYPE_REGISTER_CONSTANT) {
+                    bool constant_found;
+                    uint64_t constant_value;
+                    get_constant_value(
+                        (arguments.data[i].first_token + 1)->string_view,
+                        CONSTANT_TYPE_REGISTER,
+                        &constant_found,
+                        &constant_value);
+                    assert(constant_found && "look-up happened before and thefeore should not fail here");
+                    fprintf(stderr, "\treplaced register constant with a value of %"PRIu64"\n", constant_value);
+                    instruction |= ((Instruction)constant_value) << opcode_specification->offsets[i];
+                } else {
+                    assert(false && "unreachable");
                 }
-                instruction |= ((Instruction)register_result) << opcode_specification->offsets[i];
                 break;
-            case ARGUMENT_TYPE_REGISTER:
-                register_from_token(arguments.data[i].first_token, &success, &register_result);
-                if (!success) {
-                    error_on_token("invalid register identifier", arguments.data[i].first_token);
+            }
+            case ARGUMENT_TYPE_REGISTER: {
+                /* the argument can now either be a register (e.g. R6) or a register constant
+                 * (e.g. "sp" for the stack pointer) */
+                TokenType const token_type = arguments.data[i].first_token->type;
+                if (token_type == TOKEN_TYPE_REGISTER) {
+                    register_from_token(arguments.data[i].first_token, &success, &register_result);
+                    if (!success) {
+                        error_on_token("invalid register identifier", arguments.data[i].first_token);
+                    }
+                    instruction |= ((Instruction)register_result) << opcode_specification->offsets[i];
+                } else if (token_type == TOKEN_TYPE_REGISTER_CONSTANT) {
+                    bool constant_found;
+                    uint64_t constant_value;
+                    get_constant_value(
+                        arguments.data[i].first_token->string_view,
+                        CONSTANT_TYPE_REGISTER,
+                        &constant_found,
+                        &constant_value);
+                    assert(constant_found && "look-up happened before and thefeore should not fail here");
+                    fprintf(stderr, "\treplaced register constant with a value of %"PRIu64"\n", constant_value);
+                    instruction |= ((Instruction)constant_value) << opcode_specification->offsets[i];
+                } else {
+                    assert(false && "unreachable");
                 }
-                instruction |= ((Instruction)register_result) << opcode_specification->offsets[i];
                 break;
+            }
         }
     }
 
@@ -382,6 +436,7 @@ static void parse_instruction(void) {
                     error_on_current_token("comma expected");
                 }
                 switch (current()->type) {
+                    case TOKEN_TYPE_WORD_CONSTANT:
                     case TOKEN_TYPE_WORD_LITERAL:
                         argument_vector_push(&arguments, (Argument){
                             .type = ARGUMENT_TYPE_IMMEDIATE,
@@ -389,6 +444,7 @@ static void parse_instruction(void) {
                         });
                         valid_argument_start_position = false;
                         break;
+                    case TOKEN_TYPE_REGISTER_CONSTANT:
                     case TOKEN_TYPE_REGISTER:
                         argument_vector_push(&arguments, (Argument){
                             .type = ARGUMENT_TYPE_REGISTER,
@@ -409,6 +465,7 @@ static void parse_instruction(void) {
             } else {
                 // second token of pointer or address or label pointer
                 switch (current()->type) {
+                    case TOKEN_TYPE_WORD_CONSTANT:
                     case TOKEN_TYPE_WORD_LITERAL:
                         argument_vector_push(&arguments, (Argument){
                             .type = ARGUMENT_TYPE_ADDRESS_POINTER,
@@ -416,6 +473,7 @@ static void parse_instruction(void) {
                         });
                         valid_argument_start_position = false;
                         break;
+                    case TOKEN_TYPE_REGISTER_CONSTANT:
                     case TOKEN_TYPE_REGISTER:
                         argument_vector_push(&arguments, (Argument){
                             .type = ARGUMENT_TYPE_REGISTER_POINTER,
@@ -603,6 +661,21 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
 
     for (size_t i = 0; i < state.label_placeholders.size; ++i) {
         LabelPlaceholder const * const placeholder = &state.label_placeholders.data[i];
+
+        bool found_constant;
+        uint64_t constant_value;
+        get_constant_value(placeholder->label_token->string_view, CONSTANT_TYPE_ADDRESS, &found_constant, &constant_value);
+        if (found_constant) {
+            fprintf(
+                stderr,
+                "Replacing value at %zu with constant %"PRIx64"\n",
+                placeholder->offset,
+                constant_value
+            );
+            overwrite_u32(placeholder->offset, (Word)constant_value);
+            continue;
+        }
+
         bool found_label = false;
         for (size_t j = 0; j < state.labels.size; ++j) {
             Label const * const label = &state.labels.data[j];
