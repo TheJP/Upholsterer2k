@@ -81,7 +81,7 @@ foreach (target ${TARGET_LIST})
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         target_compile_options(${target} PUBLIC /W4 /permissive-)
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(${target} PUBLIC -Wall -Wextra -Wconversion -Wswitch -Wimplicit-fallthrough -pedantic -fsanitize=address,undefined)
+        target_compile_options(${target} PUBLIC -Wall -Wextra -Wconversion -Wswitch -Wimplicit-fallthrough -pedantic -fsanitize=address,undefined -Werror)
         target_link_options(${target} PUBLIC -fsanitize=address,undefined)
     endif ()
 
