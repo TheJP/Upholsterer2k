@@ -2,6 +2,7 @@
 #include "error.h"
 #include "types.h"
 #include "constants.h"
+#include "hashmap.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <inttypes.h>
@@ -23,8 +24,8 @@ typedef struct {
     size_t offset;
 } LabelPlaceholder;
 
-CREATE_VECTOR_DECLARATION(LabelVector, Label, label_vector)
-CREATE_VECTOR_DEFINITION(LabelVector, Label, label_vector)
+CREATE_HASHMAP_DECLARATION(LabelMap, Address, label_map)
+CREATE_HASHMAP_DEFINITION(LabelMap, Address, label_map)
 
 CREATE_VECTOR_DECLARATION(ArgumentVector, Argument, argument_vector)
 CREATE_VECTOR_DEFINITION(ArgumentVector, Argument, argument_vector)
@@ -37,7 +38,7 @@ typedef struct {
     OpcodeList opcodes;
     size_t current;
     ByteVector machine_code;
-    LabelVector labels;
+    LabelMap labels;
     SourceFile source_file;
     LabelPlaceholderVector label_placeholders;
 } ParserState;
@@ -108,9 +109,13 @@ static void emit_u64(uint64_t value) {
     if (state.machine_code.size % 8 != 0) {
         // if there are any labels referencing this code segment => adjust them
         // so that they also have the right alignment
-        for (size_t i = 0; i < state.labels.size; ++i) {
-            if (state.labels.data[i].offset == state.machine_code.size) {
-                state.labels.data[i].offset += 4;
+        for (size_t i = 0; i < state.labels.capacity; ++i) {
+            if (label_map_is_index_occupied(&state.labels, i)
+                && state.labels.data[i].value == state.machine_code.size
+            ) {
+                if (state.labels.data[i].value == state.machine_code.size) {
+                    state.labels.data[i].value += 4;
+                }
             }
         }
 
@@ -138,15 +143,13 @@ static void overwrite_u32(size_t const offset, uint32_t const value) {
 }
 
 static bool register_label(StringView label_name) {
-    for (size_t i = 0; i < state.labels.size; ++i) {
-        if (string_view_compare(label_name, state.labels.data[i].name) == 0) {
-            return false;
-        }
+    // TODO: this function performes two hashmap-lookups => get rid of one of them!!!!
+    Address* label = label_map_get(&state.labels, label_name);
+    if (label != NULL) {
+        // label with this name already exists
+        return false;
     }
-    label_vector_push(&state.labels, (Label){
-        .name = label_name,
-        .offset = (Address)state.machine_code.size,
-    });
+    label_map_insert(&state.labels, label_name, (Address)state.machine_code.size);
     return true;
 }
 
@@ -170,14 +173,14 @@ static void init_state(SourceFile const source_file, TokenVector const tokens, O
         .opcodes = opcodes,
         .current = 0,
         .machine_code = byte_vector_create(),
-        .labels = label_vector_create(),
+        .labels = label_map_create(0),
         .source_file = source_file,
         .label_placeholders = label_placeholder_vector_create(),
     };
 }
 
 static ByteVector cleanup_state(void) {
-    label_vector_free(&state.labels);
+    label_map_free(&state.labels);
     label_placeholder_vector_free(&state.label_placeholders);
     return state.machine_code;
 }
@@ -649,14 +652,16 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
         }
         next();
     }
-    for (size_t i = 0; i < state.labels.size; ++i) {
-        fprintf(
-            stderr,
-            "%.*s @ 0x%08"PRIX32"\n",
-            (int)state.labels.data[i].name.length,
-            state.labels.data[i].name.data,
-            state.labels.data[i].offset
-        );
+    for (size_t i = 0; i < state.labels.capacity; ++i) {
+        if (label_map_is_index_occupied(&state.labels, i)) {
+            fprintf(
+                stderr,
+                "%.*s @ 0x%08"PRIX32"\n",
+                (int)state.labels.data[i].key.length,
+                state.labels.data[i].key.data,
+                state.labels.data[i].value
+            );
+        }
     }
 
     for (size_t i = 0; i < state.label_placeholders.size; ++i) {
@@ -676,24 +681,18 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
             continue;
         }
 
-        bool found_label = false;
-        for (size_t j = 0; j < state.labels.size; ++j) {
-            Label const * const label = &state.labels.data[j];
-            if (string_view_compare(label->name, placeholder->label_token->string_view) == 0) {
-                found_label = true;
-                assert(state.machine_code.size > placeholder->offset && "invalid offset");
-                fprintf(
-                    stderr,
-                    "Replacing value at %zu with %"PRIx32"\n",
-                    placeholder->offset,
-                    label->offset + ENTRY_POINT
-                );
-                overwrite_u32(placeholder->offset, label->offset + ENTRY_POINT);
-                break;
-            }
-        }
-        if (!found_label) {
+        Address* offset = label_map_get(&state.labels, placeholder->label_token->string_view);
+        if (offset == NULL) {
             error_on_token("unknown label", placeholder->label_token);
+        } else {
+            assert(state.machine_code.size > placeholder->offset && "invalid offset");
+            fprintf(
+                stderr,
+                "Replacing label at %zu with %"PRIx32"\n",
+                placeholder->offset,
+                *offset + ENTRY_POINT
+            );
+            overwrite_u32(placeholder->offset, *offset + ENTRY_POINT);
         }
     }
 
