@@ -65,7 +65,7 @@ Constant constants[] = {
     {
        .name = "TERMINAL_BUFFER_SIZE",
        .type = CONSTANT_TYPE_UNSIGNED_INTEGER,
-       .value = 8008
+       .value = 8000
     },
     {
        .name = "TERMINAL_BUFFER_START",
@@ -75,12 +75,12 @@ Constant constants[] = {
     {
        .name = "TERMINAL_CURSOR_INDEX",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 8008
+       .value = 8000
     },
     {
        .name = "TERMINAL_CURSOR_MODE",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 8009
+       .value = 8004
     },
     {
        .name = "TERMINAL_CURSOR_MODE_BLINKING",
