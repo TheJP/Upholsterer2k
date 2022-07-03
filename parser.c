@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <inttypes.h>
+#include <string.h>
 
 CREATE_VECTOR_DEFINITION(ByteVector, uint8_t, byte_vector)
 
@@ -41,6 +42,7 @@ typedef struct {
     LabelMap labels;
     SourceFile source_file;
     LabelPlaceholderVector label_placeholders;
+    ConstantsMap const* constants;
 } ParserState;
 
 typedef struct {
@@ -167,7 +169,12 @@ static void error_on_current_token(char const * const message) {
     error_on_token(message, current());
 }
 
-static void init_state(SourceFile const source_file, TokenVector const tokens, OpcodeList const opcodes) {
+static void init_state(
+    SourceFile const source_file,
+    TokenVector const tokens,
+    OpcodeList const opcodes,
+    ConstantsMap const* constants
+) {
     state = (ParserState){
         .tokens = tokens,
         .opcodes = opcodes,
@@ -176,6 +183,7 @@ static void init_state(SourceFile const source_file, TokenVector const tokens, O
         .labels = label_map_create(0),
         .source_file = source_file,
         .label_placeholders = label_placeholder_vector_create(),
+        .constants = constants,
     };
 }
 
@@ -322,7 +330,9 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                     get_constant_value(
                         arguments.data[i].first_token->string_view,
                         CONSTANT_TYPE_UNSIGNED_INTEGER,
-                        &constant_found, &constant_value);
+                        &constant_found,
+                        &constant_value,
+                        state.constants);
                     assert(constant_found && "look-up happened before and therefore now should be found");
                     fprintf(stderr, "\treplaced numeric constant with value %"PRIu64"\n", constant_value);
                     instruction |= (Instruction)constant_value;
@@ -352,7 +362,8 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                         (arguments.data[i].first_token + 1)->string_view,
                         CONSTANT_TYPE_REGISTER,
                         &constant_found,
-                        &constant_value);
+                        &constant_value,
+                        state.constants);
                     assert(constant_found && "look-up happened before and thefeore should not fail here");
                     fprintf(stderr, "\treplaced register constant with a value of %"PRIu64"\n", constant_value);
                     instruction |= ((Instruction)constant_value) << opcode_specification->offsets[i];
@@ -378,7 +389,8 @@ static void emit_instruction(Token const * const mnemonic, ArgumentVector const 
                         arguments.data[i].first_token->string_view,
                         CONSTANT_TYPE_REGISTER,
                         &constant_found,
-                        &constant_value);
+                        &constant_value,
+                        state.constants);
                     assert(constant_found && "look-up happened before and thefeore should not fail here");
                     fprintf(stderr, "\treplaced register constant with a value of %"PRIu64"\n", constant_value);
                     instruction |= ((Instruction)constant_value) << opcode_specification->offsets[i];
@@ -629,13 +641,18 @@ static void parse_literal(void) {
     }
 }
 
-ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeList const opcodes) {
+ByteVector parse(
+    SourceFile const source_file,
+    TokenVector const tokens,
+    OpcodeList const opcodes,
+    ConstantsMap const* constants
+) {
     assert(tokens.size > 0);
     assert(tokens.data[tokens.size - 1].type == TOKEN_TYPE_EOF);
     if (tokens.size == 1) {
         error(source_file, "empty input", tokens.data[0].line, tokens.data[0].column, 1);
     }
-    init_state(source_file, tokens, opcodes);
+    init_state(source_file, tokens, opcodes, constants);
     while (current()->type != TOKEN_TYPE_EOF) {
         switch (current()->type) {
             case TOKEN_TYPE_IDENTIFIER:
@@ -669,7 +686,12 @@ ByteVector parse(SourceFile const source_file, TokenVector const tokens, OpcodeL
 
         bool found_constant;
         uint64_t constant_value;
-        get_constant_value(placeholder->label_token->string_view, CONSTANT_TYPE_ADDRESS, &found_constant, &constant_value);
+        get_constant_value(
+            placeholder->label_token->string_view,
+            CONSTANT_TYPE_ADDRESS,
+            &found_constant,
+            &constant_value,
+            state.constants);
         if (found_constant) {
             fprintf(
                 stderr,

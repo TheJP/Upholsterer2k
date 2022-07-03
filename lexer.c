@@ -57,7 +57,7 @@ static bool is_escape_sequence_char(char const c) {
     return c == '"' || c == '\\' || c == 't' || c == 'n' || c == 'v' || c == 'f' || c == 'r';
 }
 
-TokenVector tokenize(SourceFile const source_file) {
+TokenVector tokenize(SourceFile const source_file, ConstantsMap const* constants) {
     TokenVector tokens = token_vector_create();
     if (source_file.source.length == 0) {
         return tokens;
@@ -302,13 +302,23 @@ TokenVector tokenize(SourceFile const source_file) {
                     }
                     StringView const identifier = string_view_from_pointers(identifier_start, current);
                     bool constant_found;
-                    get_constant_value(identifier, CONSTANT_TYPE_REGISTER, &constant_found, NULL);
+                    get_constant_value(
+                        identifier,
+                        CONSTANT_TYPE_REGISTER,
+                        &constant_found,
+                        NULL,
+                        constants);
                     TokenType token_type = TOKEN_TYPE_IDENTIFIER;
                     if (constant_found) {
                         token_type = TOKEN_TYPE_REGISTER_CONSTANT;
                     }
                     if (!constant_found) {
-                        get_constant_value(identifier, CONSTANT_TYPE_UNSIGNED_INTEGER, &constant_found, NULL);
+                        get_constant_value(
+                            identifier,
+                            CONSTANT_TYPE_UNSIGNED_INTEGER,
+                            &constant_found,
+                            NULL,
+                            constants);
                         if (constant_found) {
                             token_type = TOKEN_TYPE_WORD_CONSTANT;
                         }

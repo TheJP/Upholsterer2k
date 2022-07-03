@@ -70,18 +70,22 @@ int main(int argc, char** argv) {
         .source = source,
     };
 
-    TokenVector tokens = tokenize(source_file);
+    ConstantsMap constants = constants_map_create(16);
+    fill_constants_map(&constants);
+
+    TokenVector tokens = tokenize(source_file, &constants);
 
     OpcodeList opcodes = opcode_specifications();
     check_opcodes(opcodes);
 
-    ByteVector machine_code = parse(source_file, tokens, opcodes);
+    ByteVector machine_code = parse(source_file, tokens, opcodes, &constants);
 
     write_machine_code(machine_code, stdout);
 
     // cleanup
     byte_vector_free(&machine_code);
     token_vector_free(&tokens);
+    constants_map_free(&constants);
     free(source_data);
     free(opcodes.specifications);
     return EXIT_SUCCESS;

@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #define FNV_OFFSET_BASIS 0xcbf29ce484222325
 #define FNV_PRIME 0x100000001b3
@@ -78,7 +79,7 @@ uint64_t hash_string_view(StringView string_view) {
     uint64_t hash = FNV_OFFSET_BASIS;
     for (size_t i = 0; i < string_view.length; ++i) {
         hash *= FNV_PRIME;
-        hash ^= (uint64_t)string_view.data[i];
+        hash ^= (uint64_t)tolower(string_view.data[i]); // case-insensitive due to call to tolower
     }
     return hash;
 }

@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include "string_view.h"
+#include "hashmap.h"
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -24,8 +25,7 @@ typedef struct {
     char const* abbreviation;
 } ConstantAbbreviation;
 
-extern size_t num_constants;
-extern Constant constants[];
+CREATE_HASHMAP_DECLARATION(ConstantsMap, Constant const*, constants_map)
 
 extern size_t g_num_constants;
 extern Constant g_constants[];
@@ -35,4 +35,11 @@ extern ConstantAbbreviation g_constant_abbreviations[];
 
 char const* find_constant_name_by_abbreviation(StringView abbreviation);
 void get_constant(StringView abbreviation, bool* out_found, Constant** out_constant);
-void get_constant_value(StringView abbreviation, ConstantType type, bool* out_found, uint64_t* out_value);
+void get_constant_value(
+    StringView abbreviation,
+    ConstantType type,
+    bool* out_found,
+    uint64_t* out_value,
+    ConstantsMap const* constants
+);
+void fill_constants_map(ConstantsMap* constants_map);
