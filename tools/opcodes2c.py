@@ -74,7 +74,8 @@ OpcodeList opcode_specifications(void) {\n""")
     .specifications = specifications,
     .num_specifications = num_opcodes,
 };
-}""")
+}
+""")
         except KeyError:
             sys.stderr.write("Error reading JSON file: An expected key could not be found.\n")
     except IOError:
