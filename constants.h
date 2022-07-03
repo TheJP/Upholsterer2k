@@ -27,8 +27,11 @@ typedef struct {
 extern size_t num_constants;
 extern Constant constants[];
 
-extern size_t num_constant_abbreviations;
-extern ConstantAbbreviation constant_abbreviations[];
+extern size_t g_num_constants;
+extern Constant g_constants[];
+
+extern size_t g_num_constant_abbreviations;
+extern ConstantAbbreviation g_constant_abbreviations[];
 
 char const* find_constant_name_by_abbreviation(StringView abbreviation);
 void get_constant(StringView abbreviation, bool* out_found, Constant** out_constant);

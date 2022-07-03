@@ -35,10 +35,8 @@ void get_constant_value(
     bool* out_found,
     uint64_t* out_value
 ) {
-    bool success;
-    Constant* constant;
-    get_constant(abbreviation, &success, &constant);
-    if (!success || constant->type != type) {
+    Constant const** constant = constants_map_get(constants, abbreviation);
+    if (constant == NULL || (*constant)->type != type) {
         *out_found = false;
         return;
     }

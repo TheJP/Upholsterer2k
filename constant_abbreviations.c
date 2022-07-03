@@ -1,7 +1,7 @@
 #include "constants.h"
 #include <stddef.h>
 
-ConstantAbbreviation constant_abbreviations[] = {
+ConstantAbbreviation g_constant_abbreviations[] = {
     {
        .name = "DISPLAY_HEIGHT",
        .abbreviation = "DISPLAY_HEIGHT",
@@ -88,4 +88,4 @@ ConstantAbbreviation constant_abbreviations[] = {
     },
 };
 
-size_t num_constant_abbreviations = sizeof(constant_abbreviations) / sizeof(constant_abbreviations[0]);
+size_t g_num_constant_abbreviations = sizeof(g_constant_abbreviations) / sizeof(g_constant_abbreviations[0]);
