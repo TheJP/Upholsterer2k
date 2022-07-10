@@ -4,3 +4,4 @@ bin/*
 tools/opcodes.json
 *.backseat
 .idea/*
+cmake-build-*/
