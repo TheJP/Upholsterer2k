@@ -52,9 +52,12 @@ OpcodeList opcode_specifications(void) {\n""")
                 for i, opcode in enumerate(data["opcodes"]):
                     argument_count = len(data["opcodes"][opcode]["arguments"])
                     arguments = list()
+                    offset_accumulator = 40
                     for j in range(argument_count):
                         argument = data["opcodes"][opcode]["arguments"][j] # Register/Immediate/Address
-                        offset = 40 - j * 8 if "Register" in argument else 0
+                        offset = offset_accumulator if "Register" in argument else 0
+                        if "Register" in argument:
+                            offset_accumulator -= 8
                         arguments.append(Argument(argument_as_c_enum(argument), argument_to_usage(data["opcodes"][opcode]["opcode_type"], argument), offset))
                     arguments = sorted(arguments, key=lambda arg: 0 if arg.usage == "ARGUMENT_USAGE_SOURCE" else 1)
                     out_file.write(f"    specifications[{i}] = (OpcodeSpecification){{\n")
