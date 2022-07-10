@@ -59,8 +59,12 @@ ConstantAbbreviation g_constant_abbreviations[] = {
        .abbreviation = "TERMINAL_START",
     },
     {
-       .name = "TERMINAL_CURSOR_INDEX",
-       .abbreviation = "CURSOR_INDEX",
+       .name = "TERMINAL_BUFFER_END",
+       .abbreviation = "TERMINAL_END",
+    },
+    {
+       .name = "TERMINAL_CURSOR_POINTER",
+       .abbreviation = "CURSOR_POINTER",
     },
     {
        .name = "TERMINAL_CURSOR_MODE",

@@ -63,6 +63,11 @@ Constant g_constants[] = {
        .value = 1390408
     },
     {
+       .name = "TERMINAL_BUFFER_END",
+       .type = CONSTANT_TYPE_ADDRESS,
+       .value = 8000
+    },
+    {
        .name = "TERMINAL_BUFFER_SIZE",
        .type = CONSTANT_TYPE_UNSIGNED_INTEGER,
        .value = 8000
@@ -71,11 +76,6 @@ Constant g_constants[] = {
        .name = "TERMINAL_BUFFER_START",
        .type = CONSTANT_TYPE_ADDRESS,
        .value = 0
-    },
-    {
-       .name = "TERMINAL_CURSOR_INDEX",
-       .type = CONSTANT_TYPE_ADDRESS,
-       .value = 8000
     },
     {
        .name = "TERMINAL_CURSOR_MODE",
@@ -96,6 +96,11 @@ Constant g_constants[] = {
        .name = "TERMINAL_CURSOR_MODE_VISIBLE",
        .type = CONSTANT_TYPE_UNSIGNED_INTEGER,
        .value = 1
+    },
+    {
+       .name = "TERMINAL_CURSOR_POINTER",
+       .type = CONSTANT_TYPE_ADDRESS,
+       .value = 8000
     },
     {
        .name = "TERMINAL_HEIGHT",
