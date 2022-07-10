@@ -89,6 +89,10 @@ typedef struct {
     X(PollCycleCountHighLow, POLL_CYCLES) \
 \
     X(DumpRegisters, DUMP_REGISTERS) \
-    X(DumpMemory, DUMP_MEMORY)
+    X(DumpMemory, DUMP_MEMORY) \
+    X(AssertRegisterRegister, ASSERT) \
+    X(AssertRegisterImmediate, ASSERT) \
+    X(AssertPointerImmediate, ASSERT) \
+    X(DebugBreak, DEBUG_BREAK)
 
 StringView opcode_to_mnemonic(StringView opcode);
