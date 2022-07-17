@@ -42,7 +42,7 @@ static bool is_valid_digit(char const c, WordLiteralType base) {
 }
 
 static bool is_valid_identifier_start_char(char const c) {
-    return isalpha(c) || c == '_' || c == '$';
+    return isalpha(c) || c == '_' || c == '$' || c == '%';
 }
 
 static bool is_valid_identifier_inner_char(char const c) {
