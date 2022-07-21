@@ -93,6 +93,7 @@ typedef struct {
     X(AssertRegisterRegister, ASSERT) \
     X(AssertRegisterImmediate, ASSERT) \
     X(AssertPointerImmediate, ASSERT) \
-    X(DebugBreak, DEBUG_BREAK)
+    X(DebugBreak, DEBUG_BREAK) \
+    X(PrintRegister, PRINT) \
 
 StringView opcode_to_mnemonic(StringView opcode);
