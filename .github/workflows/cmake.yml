@@ -10,6 +10,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Debug
+  CARGO_TERM_COLOR: always
 
 jobs:
   build:
@@ -18,8 +19,28 @@ jobs:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
 
-    steps:
+    steps:  
+    - name: Checkout repository of Backseat-Safe-System-2k emulator
+      uses: actions/checkout@v2.4.2
+      with:
+        # Repository name with owner. For example, actions/checkout
+        repository: Backseating-Committee-2k/BackseatSafeSystem2k
+
+    - name: Install dependencies
+      run: DEBIAN_FRONTEND=noninteractive sudo apt-get install xorg-dev libglu1-mesa-dev
+      
+    - name: Generate opcodes
+      run: cargo run -- json > ../opcodes.json
+      
+    - name: Change back to root dir
+      run: cd ..
+      
     - uses: actions/checkout@v3
+    
+    - name: Run Python scripts
+      run: |
+        python3 ./tools/opcodes2c.py ../opcodes.json ./opcodes.c
+        python3 ./tools/json2constants.py ../opcodes.json ./constants.c
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
