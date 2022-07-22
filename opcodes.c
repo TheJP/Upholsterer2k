@@ -4,7 +4,7 @@
 #include "string_view.h"
 
 OpcodeList opcode_specifications(void) {
-    size_t const num_opcodes = 65;
+    size_t const num_opcodes = 71;
     OpcodeSpecification* specifications = malloc(num_opcodes * sizeof(*specifications));
     specifications[0] = (OpcodeSpecification){
         .name = string_view_from_string("MoveRegisterImmediate"),
@@ -471,6 +471,54 @@ OpcodeList opcode_specifications(void) {
         .opcode = 0x39,
     };
     specifications[58] = (OpcodeSpecification){
+        .name = string_view_from_string("BoolCompareEquals"),
+        .mnemonic = opcode_to_mnemonic(string_view_from_string("BoolCompareEquals")),
+        .argument_count = 3,
+        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .offsets = { 32, 24, 40 },
+        .opcode = 0x3a,
+    };
+    specifications[59] = (OpcodeSpecification){
+        .name = string_view_from_string("BoolCompareNotEquals"),
+        .mnemonic = opcode_to_mnemonic(string_view_from_string("BoolCompareNotEquals")),
+        .argument_count = 3,
+        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .offsets = { 32, 24, 40 },
+        .opcode = 0x3b,
+    };
+    specifications[60] = (OpcodeSpecification){
+        .name = string_view_from_string("BoolCompareGreater"),
+        .mnemonic = opcode_to_mnemonic(string_view_from_string("BoolCompareGreater")),
+        .argument_count = 3,
+        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .offsets = { 32, 24, 40 },
+        .opcode = 0x3c,
+    };
+    specifications[61] = (OpcodeSpecification){
+        .name = string_view_from_string("BoolCompareGreaterOrEquals"),
+        .mnemonic = opcode_to_mnemonic(string_view_from_string("BoolCompareGreaterOrEquals")),
+        .argument_count = 3,
+        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .offsets = { 32, 24, 40 },
+        .opcode = 0x3d,
+    };
+    specifications[62] = (OpcodeSpecification){
+        .name = string_view_from_string("BoolCompareLess"),
+        .mnemonic = opcode_to_mnemonic(string_view_from_string("BoolCompareLess")),
+        .argument_count = 3,
+        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .offsets = { 32, 24, 40 },
+        .opcode = 0x3e,
+    };
+    specifications[63] = (OpcodeSpecification){
+        .name = string_view_from_string("BoolCompareLessOrEquals"),
+        .mnemonic = opcode_to_mnemonic(string_view_from_string("BoolCompareLessOrEquals")),
+        .argument_count = 3,
+        .required_arguments = { ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER, ARGUMENT_TYPE_REGISTER },
+        .offsets = { 32, 24, 40 },
+        .opcode = 0x3f,
+    };
+    specifications[64] = (OpcodeSpecification){
         .name = string_view_from_string("PrintRegister"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("PrintRegister")),
         .argument_count = 1,
@@ -478,7 +526,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 40 },
         .opcode = 0xfff9,
     };
-    specifications[59] = (OpcodeSpecification){
+    specifications[65] = (OpcodeSpecification){
         .name = string_view_from_string("DebugBreak"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DebugBreak")),
         .argument_count = 0,
@@ -486,7 +534,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 0 },
         .opcode = 0xfffa,
     };
-    specifications[60] = (OpcodeSpecification){
+    specifications[66] = (OpcodeSpecification){
         .name = string_view_from_string("AssertPointerImmediate"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AssertPointerImmediate")),
         .argument_count = 2,
@@ -494,7 +542,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 40, 0 },
         .opcode = 0xfffb,
     };
-    specifications[61] = (OpcodeSpecification){
+    specifications[67] = (OpcodeSpecification){
         .name = string_view_from_string("AssertRegisterImmediate"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AssertRegisterImmediate")),
         .argument_count = 2,
@@ -502,7 +550,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 40, 0 },
         .opcode = 0xfffc,
     };
-    specifications[62] = (OpcodeSpecification){
+    specifications[68] = (OpcodeSpecification){
         .name = string_view_from_string("AssertRegisterRegister"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AssertRegisterRegister")),
         .argument_count = 2,
@@ -510,7 +558,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 40, 32 },
         .opcode = 0xfffd,
     };
-    specifications[63] = (OpcodeSpecification){
+    specifications[69] = (OpcodeSpecification){
         .name = string_view_from_string("DumpMemory"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DumpMemory")),
         .argument_count = 0,
@@ -518,7 +566,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 0 },
         .opcode = 0xfffe,
     };
-    specifications[64] = (OpcodeSpecification){
+    specifications[70] = (OpcodeSpecification){
         .name = string_view_from_string("DumpRegisters"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DumpRegisters")),
         .argument_count = 0,

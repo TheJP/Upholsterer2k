@@ -95,5 +95,11 @@ typedef struct {
     X(AssertPointerImmediate, ASSERT) \
     X(DebugBreak, DEBUG_BREAK) \
     X(PrintRegister, PRINT) \
+    X(BoolCompareEquals, COMP_EQ) \
+    X(BoolCompareNotEquals, COMP_NEQ) \
+    X(BoolCompareGreater, COMP_GT) \
+    X(BoolCompareGreaterOrEquals, COMP_GE) \
+    X(BoolCompareLess, COMP_LT) \
+    X(BoolCompareLessOrEquals, COMP_LE) \
 
 StringView opcode_to_mnemonic(StringView opcode);
