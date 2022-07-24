@@ -50,6 +50,7 @@ typedef struct {
     X(CompareTargetLhsRhs, COMP) \
     X(PushRegister, PUSH) \
     X(PopRegister, POP) \
+    X(Pop, POP) \
     X(CallAddress, CALL) \
     X(CallRegister, CALL) \
     X(CallPointer, CALL) \

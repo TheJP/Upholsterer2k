@@ -4,7 +4,7 @@
 #include "string_view.h"
 
 OpcodeList opcode_specifications(void) {
-    size_t const num_opcodes = 71;
+    size_t const num_opcodes = 72;
     OpcodeSpecification* specifications = malloc(num_opcodes * sizeof(*specifications));
     specifications[0] = (OpcodeSpecification){
         .name = string_view_from_string("MoveRegisterImmediate"),
@@ -519,6 +519,14 @@ OpcodeList opcode_specifications(void) {
         .opcode = 0x3f,
     };
     specifications[64] = (OpcodeSpecification){
+        .name = string_view_from_string("Pop"),
+        .mnemonic = opcode_to_mnemonic(string_view_from_string("Pop")),
+        .argument_count = 0,
+        .required_arguments = { ARGUMENT_TYPE_NONE },
+        .offsets = { 0 },
+        .opcode = 0x40,
+    };
+    specifications[65] = (OpcodeSpecification){
         .name = string_view_from_string("PrintRegister"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("PrintRegister")),
         .argument_count = 1,
@@ -526,7 +534,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 40 },
         .opcode = 0xfff9,
     };
-    specifications[65] = (OpcodeSpecification){
+    specifications[66] = (OpcodeSpecification){
         .name = string_view_from_string("DebugBreak"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DebugBreak")),
         .argument_count = 0,
@@ -534,7 +542,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 0 },
         .opcode = 0xfffa,
     };
-    specifications[66] = (OpcodeSpecification){
+    specifications[67] = (OpcodeSpecification){
         .name = string_view_from_string("AssertPointerImmediate"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AssertPointerImmediate")),
         .argument_count = 2,
@@ -542,7 +550,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 40, 0 },
         .opcode = 0xfffb,
     };
-    specifications[67] = (OpcodeSpecification){
+    specifications[68] = (OpcodeSpecification){
         .name = string_view_from_string("AssertRegisterImmediate"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AssertRegisterImmediate")),
         .argument_count = 2,
@@ -550,7 +558,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 40, 0 },
         .opcode = 0xfffc,
     };
-    specifications[68] = (OpcodeSpecification){
+    specifications[69] = (OpcodeSpecification){
         .name = string_view_from_string("AssertRegisterRegister"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("AssertRegisterRegister")),
         .argument_count = 2,
@@ -558,7 +566,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 40, 32 },
         .opcode = 0xfffd,
     };
-    specifications[69] = (OpcodeSpecification){
+    specifications[70] = (OpcodeSpecification){
         .name = string_view_from_string("DumpMemory"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DumpMemory")),
         .argument_count = 0,
@@ -566,7 +574,7 @@ OpcodeList opcode_specifications(void) {
         .offsets = { 0 },
         .opcode = 0xfffe,
     };
-    specifications[70] = (OpcodeSpecification){
+    specifications[71] = (OpcodeSpecification){
         .name = string_view_from_string("DumpRegisters"),
         .mnemonic = opcode_to_mnemonic(string_view_from_string("DumpRegisters")),
         .argument_count = 0,
