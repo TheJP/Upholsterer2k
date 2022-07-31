@@ -46,7 +46,7 @@ static bool is_valid_identifier_start_char(char const c) {
 }
 
 static bool is_valid_identifier_inner_char(char const c) {
-    return is_valid_identifier_start_char(c) || isdigit(c);
+    return is_valid_identifier_start_char(c) || isdigit(c) || c == '-';
 }
 
 static bool is_valid_string_literal_char(char const c) {
