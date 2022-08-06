@@ -293,6 +293,42 @@ TokenVector tokenize(SourceFile const source_file, ConstantsMap const* constants
                         });
                         --current;
                     }
+                } else if (current < end - 1 && *current == '$' && *(current + 1) == '"') {
+                    // identifier with string literal inside
+                    char const * const identifier_start = current;
+                    current += 2; // consume '$' and '"'
+                    while (current != end && *current != '"') {
+                        if (*current < (char)32 || *current > (char)126) {
+                            error(
+                                source_file,
+                                "invalid character inside string literal",
+                                line,
+                                (size_t)(current - current_line_start + 1),
+                                1);
+                        }
+                        ++current;
+                    }
+                    if (current == end) {
+                        error(
+                            source_file,
+                            "unterminated string literal",
+                            line,
+                            (size_t)(current - current_line_start + 1),
+                            1);
+                    }
+                    assert(*current == '"');
+                    ++current;
+                    size_t const identifier_length = (size_t)(current - identifier_start);
+                    token_vector_push(&tokens, (Token){
+                            .type = TOKEN_TYPE_IDENTIFIER,
+                            .string_view = {
+                                .data = identifier_start,
+                                .length = identifier_length,
+                            },
+                            .column = (size_t)(identifier_start - current_line_start + 1),
+                            .line = line,
+                        });
+                    --current;
                 } else if (is_valid_identifier_start_char(*current)) {
                     // identifier or register constant or word constant
                     char const * const identifier_start = current;
