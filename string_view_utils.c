@@ -37,6 +37,7 @@ static Word char_value(char c) {
             assert(false && "unexpected character in string");
             break;
     }
+    return 0;
 }
 
 static StringView strip_prefix(StringView const string_view) {
