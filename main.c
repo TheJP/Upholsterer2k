@@ -9,13 +9,9 @@
 #include "opcodes.h"
 #include "parser.h"
 
-#ifdef __CYGWIN__
-#include<fnctl.h>
-#elif _WIN32
+#ifdef _WIN32
 #include <fcntl.h>
 #include <io.h>
-#else
-/* nothing on systems with no text-vs-binary mode */
 #endif
 
 void read_whole_file(FILE* const file, char** contents, size_t* length) {
@@ -92,11 +88,10 @@ int main(int argc, char** argv) {
     // when in windows, we have to set the mode of stdout to binary because otherwise
     // every \n will be automatically replaced with \r\n which destroys the generated
     // binary
-#if _WIN32
+#ifdef _WIN32
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    _setmode(fileno(stdout), O_BINARY);
     write_machine_code(machine_code, stdout);
 
     // cleanup
