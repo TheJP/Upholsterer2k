@@ -19,7 +19,7 @@ jobs:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
 
-    steps:  
+    steps:
     - name: Checkout repository of Backseat-Safe-System-2k emulator
       uses: actions/checkout@v3
       with:
@@ -28,15 +28,15 @@ jobs:
 
     - name: Install dependencies
       run: DEBIAN_FRONTEND=noninteractive sudo apt-get install xorg-dev libglu1-mesa-dev
-      
+
     - name: Generate opcodes
       run: cargo run -- json > ../opcodes.json
-      
+
     - name: Change back to root dir
       run: cd ..
-      
+
     - uses: actions/checkout@v3
-    
+
     - name: Run Python scripts
       run: |
         python3 ./tools/opcodes2c.py ../opcodes.json ./opcodes.c
@@ -57,13 +57,13 @@ jobs:
         # Artifact name
         name: binary
         # A file, directory or wildcard pattern that describes what to upload
-        path: ./bin/Upholsterer2k-debug
+        path: ./bin/Upholsterer2k
         # The desired behavior if no files are found using the provided path.
         if-no-files-found: error
 
     - name: Test
       if: false
       working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.  
+      # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
