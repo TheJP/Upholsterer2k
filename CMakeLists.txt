@@ -87,10 +87,4 @@ foreach (target ${TARGET_LIST})
 
     # define DEBUG_BUILD
     target_compile_definitions(${target} PUBLIC "$<$<CONFIG:DEBUG>:DEBUG_BUILD>")
-
-    # set binary filenames
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME_DEBUG ${target}-debug)
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME_RELWITHDEBINFO ${target}-relwithdebinfo)
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME_RELEASE ${target}-release)
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME_MINSIZEREL ${target}-minsizerel)
 endforeach ()
