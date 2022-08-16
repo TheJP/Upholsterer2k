@@ -102,5 +102,6 @@ typedef struct {
     X(BoolCompareGreaterOrEquals, COMP_GE) \
     X(BoolCompareLess, COMP_LT) \
     X(BoolCompareLessOrEquals, COMP_LE) \
+    X(Checkpoint, CHECKPOINT) \
 
 StringView opcode_to_mnemonic(StringView opcode);

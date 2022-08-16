@@ -26,11 +26,8 @@ jobs:
         # Repository name with owner. For example, actions/checkout
         repository: Backseating-Committee-2k/BackseatSafeSystem2k
 
-    - name: Install dependencies
-      run: DEBIAN_FRONTEND=noninteractive sudo apt-get install xorg-dev libglu1-mesa-dev
-
     - name: Generate opcodes
-      run: cargo run -- json > ../opcodes.json
+      run: cargo run --no-default-features -- json > ../opcodes.json
 
     - name: Change back to root dir
       run: cd ..
