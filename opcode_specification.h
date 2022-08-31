@@ -43,6 +43,9 @@ typedef struct {
     X(MovePointerSourceOffset, OFFSET_COPY) \
     X(MoveBytePointerSourceOffset, OFFSET_COPY_BYTE) \
     X(MoveHalfwordPointerSourceOffset, OFFSET_COPY_HALFWORD) \
+    X(MoveTargetPointerOffset, OFFSET_COPY) \
+    X(MoveByteTargetPointerOffset, OFFSET_COPY_BYTE) \
+    X(MoveHalfwordTargetPointerOffset, OFFSET_COPY_HALFWORD) \
     X(HaltAndCatchFire, HALT) \
     X(AddTargetLhsRhs, ADD) \
     X(AddWithCarryTargetLhsRhs, ADD_CARRY) \
