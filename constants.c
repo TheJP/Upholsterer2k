@@ -15,12 +15,12 @@ Constant g_constants[] = {
     {
        .name = "ENTRY_POINT",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 1914696
+       .value = 1908696
     },
     {
        .name = "FIRST_FRAMEBUFFER_START",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 8008
+       .value = 2008
     },
     {
        .name = "FLAGS",
@@ -45,7 +45,7 @@ Constant g_constants[] = {
     {
        .name = "SECOND_FRAMEBUFFER_START",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 699208
+       .value = 693208
     },
     {
        .name = "STACK_POINTER",
@@ -60,17 +60,17 @@ Constant g_constants[] = {
     {
        .name = "STACK_START",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 1390408
+       .value = 1384408
     },
     {
        .name = "TERMINAL_BUFFER_END",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 8000
+       .value = 2000
     },
     {
        .name = "TERMINAL_BUFFER_SIZE",
        .type = CONSTANT_TYPE_UNSIGNED_INTEGER,
-       .value = 8000
+       .value = 2000
     },
     {
        .name = "TERMINAL_BUFFER_START",
@@ -80,7 +80,7 @@ Constant g_constants[] = {
     {
        .name = "TERMINAL_CURSOR_MODE",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 8004
+       .value = 2004
     },
     {
        .name = "TERMINAL_CURSOR_MODE_BLINKING",
@@ -100,7 +100,7 @@ Constant g_constants[] = {
     {
        .name = "TERMINAL_CURSOR_POINTER",
        .type = CONSTANT_TYPE_ADDRESS,
-       .value = 8000
+       .value = 2000
     },
     {
        .name = "TERMINAL_HEIGHT",

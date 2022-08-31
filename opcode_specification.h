@@ -32,6 +32,17 @@ typedef struct {
     X(MoveAddressRegister, COPY) \
     X(MoveTargetPointer, COPY) \
     X(MovePointerSource, COPY) \
+    X(MoveByteRegisterAddress, COPY_BYTE) \
+    X(MoveByteAddressRegister, COPY_BYTE) \
+    X(MoveByteTargetPointer, COPY_BYTE) \
+    X(MoveBytePointerSource, COPY_BYTE) \
+    X(MoveHalfwordRegisterAddress, COPY_HALFWORD) \
+    X(MoveHalfwordAddressRegister, COPY_HALFWORD) \
+    X(MoveHalfwordTargetPointer, COPY_HALFWORD) \
+    X(MoveHalfwordPointerSource, COPY_HALFWORD) \
+    X(MovePointerSourceOffset, OFFSET_COPY) \
+    X(MoveBytePointerSourceOffset, OFFSET_COPY_BYTE) \
+    X(MoveHalfwordPointerSourceOffset, OFFSET_COPY_HALFWORD) \
     X(HaltAndCatchFire, HALT) \
     X(AddTargetLhsRhs, ADD) \
     X(AddWithCarryTargetLhsRhs, ADD_CARRY) \

@@ -6,8 +6,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define ENTRY_POINT 1914696 // TODO: must be auto-generated from the JSON file in the future!
-
 typedef enum {
     CONSTANT_TYPE_ADDRESS,
     CONSTANT_TYPE_REGISTER,

@@ -681,6 +681,16 @@ ByteVector parse(
         }
     }
 
+    bool entry_point_found;
+    uint64_t entry_point;
+    get_constant_value(
+        string_view_from_string("ENTRY_POINT"),
+        CONSTANT_TYPE_ADDRESS,
+        &entry_point_found,
+        &entry_point,
+        state.constants);
+    assert(entry_point && "entry point must be found");
+
     for (size_t i = 0; i < state.label_placeholders.size; ++i) {
         LabelPlaceholder const * const placeholder = &state.label_placeholders.data[i];
 
@@ -712,9 +722,9 @@ ByteVector parse(
                 stderr,
                 "Replacing label at %zu with %"PRIx32"\n",
                 placeholder->offset,
-                *offset + ENTRY_POINT
+                *offset + (Address)entry_point
             );
-            overwrite_u32(placeholder->offset, *offset + ENTRY_POINT);
+            overwrite_u32(placeholder->offset, *offset + (Address)entry_point);
         }
     }
 
