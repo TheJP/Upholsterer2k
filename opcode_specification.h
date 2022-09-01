@@ -63,6 +63,7 @@ typedef struct {
     X(SubtractTargetSourceImmediate, SUB) \
     X(CompareTargetLhsRhs, COMP) \
     X(PushRegister, PUSH) \
+    X(PushImmediate, PUSH) \
     X(PopRegister, POP) \
     X(Pop, POP) \
     X(CallAddress, CALL) \
