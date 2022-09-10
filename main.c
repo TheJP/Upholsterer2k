@@ -49,6 +49,22 @@ void check_opcodes(OpcodeList const opcodes) {
     }
 }
 
+void write_instruction_map(InstructionMapVector instruction_map_vector, char const * const file_name) {
+    FILE* file = fopen(file_name, "w");
+    if (!file) {
+        fprintf(stderr, "Could not open file %s to write instruction mappings to: %s.\n", file_name, strerror(errno));
+        return;
+    }
+
+    fprintf(file, "line address\n");
+    for (size_t i = 0; i < instruction_map_vector.size; ++i) {
+        InstructionMap map = instruction_map_vector.data[i];
+        fprintf(file, "%zu %zu\n", map.line, map.address);
+    }
+
+    fclose(file);
+}
+
 int main(int argc, char** argv) {
     char* source_data = NULL;
     StringView source = { 0 };
@@ -83,7 +99,8 @@ int main(int argc, char** argv) {
     OpcodeList opcodes = opcode_specifications();
     check_opcodes(opcodes);
 
-    ByteVector machine_code = parse(source_file, tokens, opcodes, &constants);
+    InstructionMapVector instruction_map_vector = instruction_map_vector_create();
+    ByteVector machine_code = parse(source_file, tokens, opcodes, &constants, &instruction_map_vector);
 
     // when in windows, we have to set the mode of stdout to binary because otherwise
     // every \n will be automatically replaced with \r\n which destroys the generated
@@ -93,6 +110,7 @@ int main(int argc, char** argv) {
 #endif
 
     write_machine_code(machine_code, stdout);
+    write_instruction_map(instruction_map_vector, "out.map"); // TODO
 
     // cleanup
     byte_vector_free(&machine_code);

@@ -10,6 +10,8 @@
 
 CREATE_VECTOR_DEFINITION(ByteVector, uint8_t, byte_vector)
 
+CREATE_VECTOR_DEFINITION(InstructionMapVector, InstructionMap, instruction_map_vector)
+
 typedef struct {
     ArgumentType type;
     Token const* first_token;
@@ -43,6 +45,7 @@ typedef struct {
     SourceFile source_file;
     LabelPlaceholderVector label_placeholders;
     ConstantsMap const* constants;
+    InstructionMapVector *instruction_map_vector;
 } ParserState;
 
 typedef struct {
@@ -173,7 +176,8 @@ static void init_state(
     SourceFile const source_file,
     TokenVector const tokens,
     OpcodeList const opcodes,
-    ConstantsMap const* constants
+    ConstantsMap const* constants,
+    InstructionMapVector *instruction_map_vector
 ) {
     state = (ParserState){
         .tokens = tokens,
@@ -184,6 +188,7 @@ static void init_state(
         .source_file = source_file,
         .label_placeholders = label_placeholder_vector_create(),
         .constants = constants,
+        .instruction_map_vector = instruction_map_vector,
     };
 }
 
@@ -511,6 +516,12 @@ static void parse_instruction(void) {
         }
         next();
     }
+
+    instruction_map_vector_push(state.instruction_map_vector, (InstructionMap){
+        .line = mnemonic->line,
+        .address = state.machine_code.size,
+    });
+
     emit_instruction(mnemonic, arguments);
     argument_vector_free(&arguments);
 }
@@ -645,14 +656,15 @@ ByteVector parse(
     SourceFile const source_file,
     TokenVector const tokens,
     OpcodeList const opcodes,
-    ConstantsMap const* constants
+    ConstantsMap const* constants,
+    InstructionMapVector *instruction_map_vector
 ) {
     assert(tokens.size > 0);
     assert(tokens.data[tokens.size - 1].type == TOKEN_TYPE_EOF);
     if (tokens.size == 1) {
         error(source_file, "empty input", tokens.data[0].line, tokens.data[0].column, 1);
     }
-    init_state(source_file, tokens, opcodes, constants);
+    init_state(source_file, tokens, opcodes, constants, instruction_map_vector);
     while (current()->type != TOKEN_TYPE_EOF) {
         switch (current()->type) {
             case TOKEN_TYPE_IDENTIFIER:
