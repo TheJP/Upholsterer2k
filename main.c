@@ -165,8 +165,14 @@ int main(int argc, char** argv) {
     OpcodeList opcodes = opcode_specifications();
     check_opcodes(opcodes);
 
-    InstructionMapVector instruction_map_vector = instruction_map_vector_create();
-    ByteVector machine_code = parse(source_file, tokens, opcodes, &constants, &instruction_map_vector);
+    InstructionMapVector instruction_map_vector;
+    InstructionMapVector* instruction_map_pointer = NULL;
+    if (arguments.instruction_map_file_name != NULL) {
+        instruction_map_vector = instruction_map_vector_create();
+        instruction_map_pointer = &instruction_map_vector;
+    }
+
+    ByteVector machine_code = parse(source_file, tokens, opcodes, &constants, instruction_map_pointer);
 
     // when in windows, we have to set the mode of stdout to binary because otherwise
     // every \n will be automatically replaced with \r\n which destroys the generated
@@ -181,6 +187,9 @@ int main(int argc, char** argv) {
     }
 
     // cleanup
+    if (instruction_map_pointer != NULL) {
+        instruction_map_vector_free(instruction_map_pointer);
+    }
     byte_vector_free(&machine_code);
     token_vector_free(&tokens);
     constants_map_free(&constants);

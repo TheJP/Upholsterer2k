@@ -517,10 +517,12 @@ static void parse_instruction(void) {
         next();
     }
 
-    instruction_map_vector_push(state.instruction_map_vector, (InstructionMap){
-        .line = mnemonic->line,
-        .address = state.machine_code.size,
-    });
+    if (state.instruction_map_vector != NULL) {
+        instruction_map_vector_push(state.instruction_map_vector, (InstructionMap){
+            .line = mnemonic->line,
+            .address = state.machine_code.size,
+        });
+    }
 
     emit_instruction(mnemonic, arguments);
     argument_vector_free(&arguments);
