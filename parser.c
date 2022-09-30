@@ -705,6 +705,12 @@ ByteVector parse(
         state.constants);
     assert(entry_point && "entry point must be found");
 
+    if (instruction_map_vector != NULL) {
+        for (size_t i = 0; i < instruction_map_vector->size; ++i) {
+            instruction_map_vector->data[i].address += entry_point;
+        }
+    }
+
     for (size_t i = 0; i < state.label_placeholders.size; ++i) {
         LabelPlaceholder const * const placeholder = &state.label_placeholders.data[i];
 
