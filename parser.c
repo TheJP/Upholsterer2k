@@ -517,15 +517,18 @@ static void parse_instruction(void) {
         next();
     }
 
+    emit_instruction(mnemonic, arguments);
+    argument_vector_free(&arguments);
+
+    // Writing line mapping after emitting instruction, because
+    // emit_instruction can increase position by 8 (normal) or
+    // by 12 (to fix alignment).
     if (state.instruction_map_vector != NULL) {
         instruction_map_vector_push(state.instruction_map_vector, (InstructionMap){
             .line = mnemonic->line,
-            .address = state.machine_code.size,
+            .address = state.machine_code.size - 8,
         });
     }
-
-    emit_instruction(mnemonic, arguments);
-    argument_vector_free(&arguments);
 }
 
 static void parse_identifier(void) {
