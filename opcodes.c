@@ -191,10 +191,10 @@ OpcodeList opcode_specifications(void) {
         .opcode = 0x16,
     };
     specifications[23] = (OpcodeSpecification){
-        .name = string_view_from_string("CallAddress"),
-        .mnemonic = opcode_to_mnemonic(string_view_from_string("CallAddress")),
+        .name = string_view_from_string("CallImmediate"),
+        .mnemonic = opcode_to_mnemonic(string_view_from_string("CallImmediate")),
         .argument_count = 1,
-        .required_arguments = { ARGUMENT_TYPE_ADDRESS_POINTER },
+        .required_arguments = { ARGUMENT_TYPE_IMMEDIATE },
         .offsets = { 0 },
         .opcode = 0x17,
     };
