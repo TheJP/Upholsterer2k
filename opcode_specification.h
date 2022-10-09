@@ -66,7 +66,7 @@ typedef struct {
     X(PushImmediate, PUSH) \
     X(PopRegister, POP) \
     X(Pop, POP) \
-    X(CallAddress, CALL) \
+    X(CallImmediate, CALL) \
     X(CallRegister, CALL) \
     X(CallPointer, CALL) \
     X(Return, RETURN) \
